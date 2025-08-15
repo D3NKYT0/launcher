@@ -7,12 +7,12 @@ Este guia detalha como fazer o deploy e distribuição do L2Updater refatorado, 
 ## 🚀 Pré-requisitos
 
 ### **Para Desenvolvimento**
-- **.NET 6.0 SDK** ou superior
+- **.NET 9.0 SDK** ou superior
 - **Visual Studio 2022** ou **VS Code**
 - **Windows 10/11** (64-bit)
 
 ### **Para Distribuição**
-- **.NET 6.0 Runtime** (para usuários finais)
+- **.NET 9.0 Runtime** (para usuários finais)
 - **Windows 10/11** (64-bit) - Sistema alvo
 
 ## 📦 Compilação
@@ -57,7 +57,7 @@ dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile
 - ✅ Atualizações automáticas do runtime
 
 **Desvantagens:**
-- ❌ Requer .NET 6.0 Runtime instalado
+- ❌ Requer .NET 9.0 Runtime instalado
 - ❌ Pode ter problemas de compatibilidade
 
 #### **Self-contained**
@@ -249,7 +249,7 @@ pause
 echo Deploying L2Updater...
 
 REM Variáveis
-set SOURCE_DIR=bin\Release\net6.0-windows\win-x64\publish
+set SOURCE_DIR=bin\Release\net9.0-windows\win-x64\publish
 set TARGET_DIR=C:\inetpub\wwwroot\update
 set BACKUP_DIR=C:\backup\update_%date:~-4,4%%date:~-10,2%%date:~-7,2%
 
@@ -282,7 +282,7 @@ dotnet build -c Release
 dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
 
 # Deploy
-$sourcePath = "bin\Release\net6.0-windows\win-x64\publish"
+$sourcePath = "bin\Release\net9.0-windows\win-x64\publish"
 $targetPath = "\\server\update"
 
 Copy-Item -Path "$sourcePath\*" -Destination $targetPath -Recurse -Force
@@ -376,7 +376,7 @@ Error: Game executable not found
 ### **Tamanhos de Arquivo**
 | Configuração | Tamanho | Descrição |
 |--------------|---------|-----------|
-| Framework-dependent | ~15MB | Requer .NET 6 Runtime |
+| Framework-dependent | ~15MB | Requer .NET 9 Runtime |
 | Self-contained | ~80MB | Independente |
 | Single File | ~20MB | Arquivo único |
 
@@ -411,7 +411,7 @@ CopyDirectory(savePath, backupPath);
 ```csharp
 // Controle de versão
 public const int CURRENT_VERSION = 3;
-public const string VERSION_STRING = "2.0.0";
+public const string VERSION_STRING = "2.1.0";
 ```
 
 ## 🎯 Próximos Passos

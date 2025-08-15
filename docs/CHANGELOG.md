@@ -1,5 +1,21 @@
 # Changelog - L2Updater Refatoração
 
+## [2.1.0] - 2024-12-19
+
+### 🚀 **Migração para .NET 9**
+- **Atualização do .NET 6 para .NET 9**
+  - Melhor performance e otimizações
+  - Suporte a recursos mais modernos do C#
+  - Compilação mais rápida
+  - Melhor gerenciamento de memória
+
+- **Atualização de Pacotes NuGet**
+  - Microsoft.Extensions.* → 9.0.0
+  - Serilog → 3.1.1
+  - Serilog.Extensions.Logging → 8.0.0
+  - Serilog.Sinks.File → 6.0.0
+  - CommunityToolkit.Mvvm → 8.2.2
+
 ## [2.0.0] - 2024-12-19
 
 ### 🚀 **Mudanças Principais**
@@ -184,7 +200,7 @@ catch (Exception ex)
 
 | Aspecto | Antes | Depois |
 |---------|-------|--------|
-| **Framework** | .NET Framework 4.5 | .NET 6 |
+| **Framework** | .NET Framework 4.5 | .NET 9 |
 | **HTTP Client** | WebClient (deprecated) | HttpClient |
 | **Configuração** | XML hardcoded | JSON flexível |
 | **Arquitetura** | Monolítica (1194 linhas) | MVVM + DI |
@@ -239,9 +255,9 @@ services.AddTransient<MainViewModel>();
 
 ### 🚨 **Breaking Changes**
 
-1. **.NET Framework 4.5** → **.NET 6**
-   - Requer .NET 6 Runtime
-   - Incompatível com Windows XP/Vista
+1. **.NET Framework 4.5** → **.NET 9**
+   - Requer .NET 9 Runtime
+   - Incompatível com Windows XP/Vista/7/8
 
 2. **Configuração XML** → **JSON**
    - Novo arquivo `appsettings.json`
@@ -258,14 +274,14 @@ services.AddTransient<MainViewModel>();
 ### 🔄 **Guia de Migração**
 
 #### **Para Desenvolvedores**
-1. Instalar .NET 6 SDK
+1. Instalar .NET 9 SDK
 2. Atualizar referências de pacotes
 3. Migrar configurações XML para JSON
 4. Atualizar ViewModels para usar CommunityToolkit.Mvvm
 5. Implementar injeção de dependência
 
 #### **Para Usuários**
-1. Instalar .NET 6 Runtime
+1. Instalar .NET 9 Runtime
 2. Configurar `appsettings.json`
 3. Executar com `dotnet run`
 
