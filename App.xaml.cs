@@ -21,7 +21,8 @@ namespace L2Updater
             {
                 // Configure Serilog
                 Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(GetConfiguration())
+                    .WriteTo.Console()
+                    .WriteTo.File("logs/l2updater.log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7)
                     .CreateLogger();
 
                 // Configure services
@@ -31,7 +32,7 @@ namespace L2Updater
                 _serviceProvider = services.BuildServiceProvider();
 
                 // Create and show main window
-                var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+                var mainWindow = _serviceProvider.GetRequiredService<Updater.MainWindow>();
                 mainWindow.Show();
             }
             catch (Exception ex)
@@ -62,7 +63,6 @@ namespace L2Updater
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
-                .AddEnvironmentVariables()
                 .Build();
         }
 
@@ -98,7 +98,7 @@ namespace L2Updater
             services.AddTransient<MainViewModel>();
 
             // Views
-            services.AddTransient<MainWindow>();
+            services.AddTransient<Updater.MainWindow>();
         }
     }
 }

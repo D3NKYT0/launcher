@@ -3,6 +3,7 @@
     <AssemblyName>L2Updater</AssemblyName>
     <OutputType>WinExe</OutputType>
     <UseWPF>True</UseWPF>
+    <UseWindowsForms>True</UseWindowsForms>
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -11,6 +12,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,10 +22,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog" Version="4.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
@@ -31,8 +33,7 @@
   <ItemGroup>
     <None Remove="l2.ico" />
     <None Remove="Updater\pictures\background.png" />
-    <None Remove="Updater\pictures\background2.png" />
-    <None Remove="Updater\pictures\background3.png" />
+
     <None Remove="Updater\pictures\button.png" />
     <None Remove="Updater\pictures\button2.png" />
     <None Remove="Updater\pictures\button_hover.png" />
@@ -64,8 +65,7 @@
   <ItemGroup>
     <Resource Include="l2.ico" />
     <Resource Include="Updater\pictures\background.png" />
-    <Resource Include="Updater\pictures\background2.png" />
-    <Resource Include="Updater\pictures\background3.png" />
+
     <Resource Include="Updater\pictures\button.png" />
     <Resource Include="Updater\pictures\button2.png" />
     <Resource Include="Updater\pictures\button_hover.png" />

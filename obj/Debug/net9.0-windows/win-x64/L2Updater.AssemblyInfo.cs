@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("L2Updater")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0fceed4a4da31897f0c0088d32bfa9526215f4a8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72fd1055ff3c9a31f422ea927630317bc4a8fa87")]
 [assembly: System.Reflection.AssemblyProductAttribute("L2Updater")]
 [assembly: System.Reflection.AssemblyTitleAttribute("L2Updater")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

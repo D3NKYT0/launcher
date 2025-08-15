@@ -288,7 +288,7 @@ namespace Updater.ViewModels
 
         private string GetGamePath()
         {
-            return Path.Combine(SavePath, _settings.GameSettings.GameStartPath);
+            return Path.Combine(SavePath, _settings.UpdateSettings.GameStartPath);
         }
 
         private async Task StartProcessAsync(string executablePath, string workingDirectory)

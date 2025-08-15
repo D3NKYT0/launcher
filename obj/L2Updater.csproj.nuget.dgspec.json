@@ -90,19 +90,19 @@
             },
             "Serilog": {
               "target": "Package",
-              "version": "[3.1.1, )"
+              "version": "[4.0.0, )"
             },
             "Serilog.Extensions.Logging": {
               "target": "Package",
               "version": "[8.0.0, )"
             },
-            "Serilog.Sinks.File": {
+            "Serilog.Sinks.Console": {
               "target": "Package",
               "version": "[6.0.0, )"
             },
-            "System.Security.Cryptography.X509Certificates": {
+            "Serilog.Sinks.File": {
               "target": "Package",
-              "version": "[9.0.0, )"
+              "version": "[6.0.0, )"
             }
           },
           "imports": [
@@ -120,7 +120,7 @@
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             },
-            "Microsoft.WindowsDesktop.App.WPF": {
+            "Microsoft.WindowsDesktop.App": {
               "privateAssets": "none"
             }
           },

@@ -6,11 +6,11 @@ namespace Updater.UtillsClasses
 {
 	public class RelayCommand : ICommand
 	{
-		private readonly Action<object> _execute;
+		private readonly Action<object?> _execute;
 
-		private readonly Predicate<object> _canExecute;
+		private readonly Predicate<object?>? _canExecute;
 
-		public event EventHandler CanExecuteChanged
+		public event EventHandler? CanExecuteChanged
 		{
 			add
 			{
@@ -22,7 +22,7 @@ namespace Updater.UtillsClasses
 			}
 		}
 
-		public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+		public RelayCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
 		{
 			if (execute == null)
 			{
@@ -33,12 +33,12 @@ namespace Updater.UtillsClasses
 		}
 
 		[DebuggerStepThrough]
-		public bool CanExecute(object parameter)
+		public bool CanExecute(object? parameter)
 		{
 			return _canExecute == null || _canExecute(parameter);
 		}
 
-		public void Execute(object parameter = null)
+		public void Execute(object? parameter = null)
 		{
 			_execute(parameter);
 		}
