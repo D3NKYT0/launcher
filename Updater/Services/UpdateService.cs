@@ -170,7 +170,7 @@ namespace Updater.Services
             }
         }
 
-        public async Task<List<FileModel>> GetFilesToUpdateAsync(UpdateInfoModel updateInfo, UpdateTypes updateType, string rootPath, CancellationToken cancellationToken = default)
+        public Task<List<FileModel>> GetFilesToUpdateAsync(UpdateInfoModel updateInfo, UpdateTypes updateType, string rootPath, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -203,7 +203,7 @@ namespace Updater.Services
                 }
 
                 _logger.LogInformation("Found {FileCount} files to update", filesToUpdate.Count);
-                return filesToUpdate;
+                return Task.FromResult(filesToUpdate);
             }
             catch (Exception ex)
             {
@@ -273,7 +273,7 @@ namespace Updater.Services
             }
         }
 
-        public async Task<bool> ValidateUpdateAsync(UpdateInfoModel updateInfo, CancellationToken cancellationToken = default)
+        public Task<bool> ValidateUpdateAsync(UpdateInfoModel updateInfo, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace Updater.Services
                 if (updateInfo?.Folder == null)
                 {
                     _logger.LogError("Update info or folder is null");
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 // Validate critical files
@@ -292,17 +292,17 @@ namespace Updater.Services
                     if (!_securityService.IsFileExtensionAllowed(file.Name))
                     {
                         _logger.LogError("Critical file has blocked extension: {FileName}", file.Name);
-                        return false;
+                        return Task.FromResult(false);
                     }
                 }
 
                 _logger.LogInformation("Update validation successful");
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating update");
-                return false;
+                return Task.FromResult(false);
             }
         }
 

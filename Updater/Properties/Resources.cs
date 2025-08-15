@@ -12,9 +12,9 @@ namespace Updater.Properties
 	[CompilerGenerated]
 	internal class Resources
 	{
-		private static ResourceManager resourceMan;
+		private static ResourceManager? resourceMan;
 
-		private static CultureInfo resourceCulture;
+		private static CultureInfo? resourceCulture;
 
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		internal static ResourceManager ResourceManager
@@ -30,7 +30,7 @@ namespace Updater.Properties
 		}
 
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
-		internal static CultureInfo Culture
+		internal static CultureInfo? Culture
 		{
 			get
 			{
@@ -42,12 +42,12 @@ namespace Updater.Properties
 			}
 		}
 
-		internal static byte[] Hardcodet_Wpf_TaskbarNotification
+		internal static byte[]? Hardcodet_Wpf_TaskbarNotification
 		{
 			get
 			{
-				object @object = ResourceManager.GetObject("Hardcodet_Wpf_TaskbarNotification", resourceCulture);
-				return (byte[])@object;
+				object? @object = ResourceManager.GetObject("Hardcodet_Wpf_TaskbarNotification", resourceCulture);
+				return (byte[]?)@object;
 			}
 		}
 

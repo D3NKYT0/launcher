@@ -6,7 +6,7 @@ namespace Updater.DataContractModels
 	[XmlRoot("Folder")]
 	public class FolderModel
 	{
-		public string Name
+		public required string Name
 		{
 			get;
 			set;
@@ -19,13 +19,11 @@ namespace Updater.DataContractModels
 			set;
 		} = new List<FolderModel>();
 
-
 		[XmlArray("Files")]
 		public List<FileModel> Files
 		{
 			get;
 			set;
 		} = new List<FileModel>();
-
 	}
 }

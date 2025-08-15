@@ -143,7 +143,7 @@ namespace Updater.Services
             }
         }
 
-        private async Task<bool> ValidateExecutableSignatureAsync(string filePath)
+        private Task<bool> ValidateExecutableSignatureAsync(string filePath)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace Updater.Services
                 if (fileInfo.Length < 1024) // Arquivo muito pequeno para ser um executável válido
                 {
                     _logger.LogWarning("Executable file too small: {FilePath} ({Size} bytes)", filePath, fileInfo.Length);
-                    return false;
+                    return Task.FromResult(false);
                 }
 
                 // Verificar se o arquivo tem cabeçalho PE (Portable Executable)
@@ -166,15 +166,15 @@ namespace Updater.Services
                 if (dosHeader != 0x5A4D) // MZ signature
                 {
                     _logger.LogWarning("Invalid executable header for {FilePath}", filePath);
-                    return false;
+                    return Task.FromResult(false);
                 }
 
-                return true;
+                return Task.FromResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating executable signature for {FilePath}", filePath);
-                return false;
+                return Task.FromResult(false);
             }
         }
     }

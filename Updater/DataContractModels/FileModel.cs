@@ -6,13 +6,13 @@ namespace Updater.DataContractModels
 	[XmlRoot("File")]
 	public class FileModel
 	{
-		public string Name
+		public required string Name
 		{
 			get;
 			set;
 		}
 
-		public string Path
+		public required string Path
 		{
 			get;
 			set;
@@ -24,14 +24,14 @@ namespace Updater.DataContractModels
 			set;
 		}
 
-		public string Hash
+		public required string Hash
 		{
 			get;
 			set;
 		}
 
 		[XmlIgnore]
-		public string SavePath
+		public required string SavePath
 		{
 			get;
 			set;

@@ -2,23 +2,14 @@ using System;
 
 namespace Updater.Annotations
 {
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class AspMvcControllerAttribute : Attribute
 	{
 		[CanBeNull]
-		public string AnonymousProperty
+		public string? AnonymousProperty
 		{
 			get;
-			private set;
-		}
-
-		public AspMvcControllerAttribute()
-		{
-		}
-
-		public AspMvcControllerAttribute([NotNull] string anonymousProperty)
-		{
-			AnonymousProperty = anonymousProperty;
+			set;
 		}
 	}
 }

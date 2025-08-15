@@ -2,10 +2,10 @@ using System.Xml.Serialization;
 
 namespace Updater.DataContractModels
 {
-	[XmlRoot("File")]
+	[XmlRoot("FileUpdate")]
 	public class FileUpdateModel
 	{
-		public string Name
+		public required string Name
 		{
 			get;
 			set;
@@ -17,13 +17,19 @@ namespace Updater.DataContractModels
 			set;
 		}
 
-		public string Hash
+		public required string Hash
 		{
 			get;
 			set;
 		}
 
-		public int Version
+		public bool QuickUpdate
+		{
+			get;
+			set;
+		}
+
+		public bool CheckHash
 		{
 			get;
 			set;

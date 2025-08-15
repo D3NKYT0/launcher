@@ -1,5 +1,5 @@
+using System;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 
 namespace Updater.HashCalc
@@ -16,7 +16,7 @@ namespace Updater.HashCalc
 
 		private uint[] table;
 
-		private static uint[] defaultTable;
+		private static uint[]? defaultTable;
 
 		public override int HashSize => 32;
 
@@ -112,9 +112,12 @@ namespace Updater.HashCalc
 		{
 			Crc32 crc = new Crc32();
 			string result = string.Empty;
-			using (StreamReader streamReader = new StreamReader(File.OpenRead(FilePath)))
+			using (FileStream fs = File.Open(FilePath, FileMode.Open))
 			{
-				result = crc.ComputeHash(streamReader.BaseStream).Aggregate(result, (string current, byte b) => current + b.ToString("x2").ToLower());
+				foreach (byte b in crc.ComputeHash(fs))
+				{
+					result += b.ToString("x2").ToLower();
+				}
 			}
 			return result;
 		}

@@ -2,23 +2,14 @@ using System;
 
 namespace Updater.Annotations
 {
-	[MeansImplicitUse(ImplicitUseTargetFlags.WithMembers)]
+	[AttributeUsage(AttributeTargets.All)]
 	public sealed class PublicAPIAttribute : Attribute
 	{
 		[CanBeNull]
-		public string Comment
+		public string? Comment
 		{
 			get;
-			private set;
-		}
-
-		public PublicAPIAttribute()
-		{
-		}
-
-		public PublicAPIAttribute([NotNull] string comment)
-		{
-			Comment = comment;
+			set;
 		}
 	}
 }

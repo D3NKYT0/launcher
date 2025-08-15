@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Updater.DataContractModels
@@ -11,10 +12,17 @@ namespace Updater.DataContractModels
 			set;
 		}
 
-		public FolderModel Folder
+		public required FolderModel Folder
 		{
 			get;
 			set;
 		}
+
+		[XmlArray("Folders")]
+		public List<FolderModel> Folders
+		{
+			get;
+			set;
+		} = new List<FolderModel>();
 	}
 }

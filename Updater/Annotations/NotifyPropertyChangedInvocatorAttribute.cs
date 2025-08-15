@@ -6,10 +6,10 @@ namespace Updater.Annotations
 	public sealed class NotifyPropertyChangedInvocatorAttribute : Attribute
 	{
 		[CanBeNull]
-		public string ParameterName
+		public string? ParameterName
 		{
 			get;
-			private set;
+			set;
 		}
 
 		public NotifyPropertyChangedInvocatorAttribute()

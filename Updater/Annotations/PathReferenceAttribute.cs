@@ -6,7 +6,7 @@ namespace Updater.Annotations
 	public sealed class PathReferenceAttribute : Attribute
 	{
 		[CanBeNull]
-		public string BasePath
+		public string? BasePath
 		{
 			get;
 			private set;

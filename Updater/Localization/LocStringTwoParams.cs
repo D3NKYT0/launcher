@@ -4,13 +4,13 @@ namespace Updater.Localization
 {
 	public class LocStringTwoParams : LocString
 	{
-		public string Param1
+		public required string Param1
 		{
 			get;
 			set;
 		}
 
-		private string Param2
+		public required string Param2
 		{
 			get;
 			set;
@@ -23,9 +23,10 @@ namespace Updater.Localization
 			_ => throw new ArgumentOutOfRangeException(), 
 		};
 
-		public LocStringTwoParams(string rusStr, string engStr)
-			: base(rusStr, engStr)
+		public LocStringTwoParams(string rusStr, string engStr, string param1, string param2) : base(rusStr, engStr)
 		{
+			Param1 = param1;
+			Param2 = param2;
 		}
 	}
 }

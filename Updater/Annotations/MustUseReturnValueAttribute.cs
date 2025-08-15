@@ -6,7 +6,7 @@ namespace Updater.Annotations
 	public sealed class MustUseReturnValueAttribute : Attribute
 	{
 		[CanBeNull]
-		public string Justification
+		public string? Justification
 		{
 			get;
 			private set;

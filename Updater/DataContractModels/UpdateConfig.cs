@@ -5,13 +5,13 @@ namespace Updater.DataContractModels
 	[XmlRoot("UpdateConfig")]
 	public class UpdateConfig
 	{
-		public string UpdaterTitle
+		public required string UpdaterTitle
 		{
 			get;
 			set;
 		}
 
-		public string SelfUpdatePath
+		public required string SelfUpdatePath
 		{
 			get;
 			set;
@@ -24,127 +24,127 @@ namespace Updater.DataContractModels
 		} = 1;
 
 
-		public string GameStartPathRu
+		public required string GameStartPathRu
 		{
 			get;
 			set;
 		}
 
-		public string GameStartPathEng
+		public required string GameStartPathEng
 		{
 			get;
 			set;
 		}
 
-		public string PatchPath
+		public required string PatchPath
 		{
 			get;
 			set;
 		}
 
-		public string SiteLink
+		public required string SiteLink
 		{
 			get;
 			set;
 		}
 
-		public string RegLink
+		public required string RegLink
 		{
 			get;
 			set;
 		}
 
-		public string AboutServerLink
+		public required string AboutServerLink
 		{
 			get;
 			set;
 		}
 
-		public string ForumLink
+		public required string ForumLink
 		{
 			get;
 			set;
 		}
 
-		public string HelpLink
+		public required string HelpLink
 		{
 			get;
 			set;
 		}
 
-		public string BonusLink
+		public required string BonusLink
 		{
 			get;
 			set;
 		}
 
-		public string FBLink
+		public required string FBLink
 		{
 			get;
 			set;
 		}
 
-		public string DiscordLink
+		public required string DiscordLink
 		{
 			get;
 			set;
 		}
 
-		public string TelegramLink
+		public required string TelegramLink
 		{
 			get;
 			set;
 		}
 
-		public string VkLink
+		public required string VkLink
 		{
 			get;
 			set;
 		}
 
-		public string SupportLink
+		public required string SupportLink
 		{
 			get;
 			set;
 		}
 
-		public string DonationLink
+		public required string DonationLink
 		{
 			get;
 			set;
 		}
 
-		public string CabinetLink
+		public required string CabinetLink
 		{
 			get;
 			set;
 		}
 
-		public string L2Top
+		public required string L2Top
 		{
 			get;
 			set;
 		}
 
-		public string MMOTop
+		public required string MMOTop
 		{
 			get;
 			set;
 		}
 
-		public string DownloadLink1
+		public required string DownloadLink1
 		{
 			get;
 			set;
 		}
 
-		public string DownloadLink2
+		public required string DownloadLink2
 		{
 			get;
 			set;
 		}
 
-		public string DownloadLink3
+		public required string DownloadLink3
 		{
 			get;
 			set;

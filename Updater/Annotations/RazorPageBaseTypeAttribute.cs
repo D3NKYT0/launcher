@@ -2,7 +2,7 @@ using System;
 
 namespace Updater.Annotations
 {
-	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class RazorPageBaseTypeAttribute : Attribute
 	{
 		[NotNull]
@@ -13,10 +13,10 @@ namespace Updater.Annotations
 		}
 
 		[CanBeNull]
-		public string PageName
+		public string? PageName
 		{
 			get;
-			private set;
+			set;
 		}
 
 		public RazorPageBaseTypeAttribute([NotNull] string baseType)
