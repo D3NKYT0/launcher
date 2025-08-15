@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:Updater.Properties">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Updater;component/MainStyleDict.xaml" />
+    <ResourceDictionary Source="/Averia;component/MainStyleDict.xaml" />
+    <ResourceDictionary Source="/Vavilon;component/MainStyleDict.xaml" />
+    <ResourceDictionary Source="/Remorese;component/MainStyleDict.xaml" />
+    <ResourceDictionary Source="/Remorse;component/MainStyleDict.xaml" />
+    <ResourceDictionary Source="/Multicraft;component/MainStyleDict.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

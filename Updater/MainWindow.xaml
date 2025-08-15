@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="Updater.MainWindow" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:local="clr-namespace:Updater" 
+        
+        
+        xmlns:converters="clr-namespace:Updater.UtillsClasses"
+        
+        xmlns:tb="http://www.hardcodet.net/taskbar" 
+        xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        Title="L2JCore" 
+        Height="537" 
+        Width="1140" 
+        AllowsTransparency="True" 
+        WindowStyle="None" 
+        WindowStartupLocation="CenterScreen" 
+        Icon="../l2.ico" 
+        Background="{x:Null}" 
+        ContentRendered="Window_ContentRendered">
+    <FrameworkElement.Resources>
+
+
+        <ResourceDictionary />
+
+
+    </FrameworkElement.Resources>
+    <FrameworkElement.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource OpenAnimation}" />
+        </EventTrigger>
+    </FrameworkElement.Triggers>
+    <Grid Name="grid" Width="1140" Height="537" MouseDown="Grid_MouseDown">
+        <Rectangle Name="BackGround" Width="1140" Height="537">
+            <Shape.Fill>
+                <ImageBrush ImageSource="pictures/background.png" />
+            </Shape.Fill>
+        </Rectangle>
+        <Rectangle Name="BackGroundEng" Width="1140" Height="537">
+            <Shape.Fill>
+                <ImageBrush ImageSource="pictures/background.png" />
+            </Shape.Fill>
+        </Rectangle>
+        <Button Name="Cancel" Content="ОТМЕНА" Margin="312,436,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource CancelButtonPictureTemplate}" Height="42" FontSize="18" Width="140" HorizontalAlignment="Left" Command="{Binding CancelCommand}" >
+            <av:Button.Background>
+                <av:LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                    <av:GradientStop Color="#FFF3F3F3" Offset="0"/>
+                    <av:GradientStop Color="#FFEBEBEB" Offset="0.5"/>
+                    <av:GradientStop Color="#FFDDDDDD" Offset="0.5"/>
+                    <av:GradientStop Color="#FFCDCDCD" Offset="1"/>
+                </av:LinearGradientBrush>
+            </av:Button.Background>
+        </Button>
+        <Button Name="QuickCheck" Content="Быстрая проверка" HorizontalAlignment="Left" Margin="650,346,0,0" VerticalAlignment="Top" Width="179" Cursor="Hand" Height="42" Template="{DynamicResource ButtonTemplate}" FontSize="18.667" Visibility="Hidden" Command="{Binding QuickCommand}" />
+        <Button Name="FullCheck" Content="ОБНОВИТЬ" Margin="659,438,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource FullCheckButtonPictureTemplate}" Height="42" FontSize="18.667" Width="140" HorizontalAlignment="Left" Command="{Binding FullCommand}" >
+            <av:Button.Background>
+                <av:LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                    <av:GradientStop Color="#FFF3F3F3" Offset="0"/>
+                    <av:GradientStop Color="#FFEBEBEB" Offset="0.5"/>
+                    <av:GradientStop Color="#FFDDDDDD" Offset="0.5"/>
+                    <av:GradientStop Color="#FFCDCDCD" Offset="1"/>
+                </av:LinearGradientBrush>
+            </av:Button.Background>
+        </Button>
+        <Button Name="StartButton" Content="" HorizontalAlignment="Left" Margin="450,424,0,0" VerticalAlignment="Top" Template="{DynamicResource StartButtonPictureTemplate}" FontSize="24" Cursor="Hand" Command="{Binding StartCommand}" Foreground="{x:Null}" BorderBrush="{x:Null}" Width="215" Height="70" Background="{x:Null}" RenderTransformOrigin="0.504,0.508" />
+        <ProgressBar Name="FileProgress" HorizontalAlignment="Left" Height="6" Margin="807,455,0,0" VerticalAlignment="Top" Width="181" Value="{Binding ProgressFile}" Maximum="{Binding MaxProgressFile}" Background="{x:Null}" BorderBrush="{x:Null}">
+            <Control.Foreground>
+                <ImageBrush ImageSource="pictures/progress.png" />
+            </Control.Foreground>
+        </ProgressBar>
+        <ProgressBar Name="FullProgress" HorizontalAlignment="Left" Height="6" Margin="128,454,0,0" VerticalAlignment="Top" Width="169" Value="{Binding ProgressFull}" Maximum="{Binding MaxProgressFull}" BorderBrush="{x:Null}" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+            <av:ProgressBar.RenderTransform>
+                <av:TransformGroup>
+                    <av:ScaleTransform/>
+                    <av:SkewTransform/>
+                    <av:RotateTransform Angle="0.624"/>
+                    <av:TranslateTransform/>
+                </av:TransformGroup>
+            </av:ProgressBar.RenderTransform>
+            <Control.Foreground>
+                <ImageBrush ImageSource="pictures/progress2.png" />
+            </Control.Foreground>
+        </ProgressBar>
+        <Label Name="Information" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="795,424,0,0" VerticalAlignment="Top" Height="22" Width="197" FontFamily="Raleway" Foreground="#CFEEE8E0" FontWeight="Medium" FontSize="11" Content="{Binding Info.GetLocStr}" RenderTransformOrigin="0.5,0.5" >
+            <av:Label.RenderTransform>
+                <av:TransformGroup>
+                    <av:ScaleTransform/>
+                    <av:SkewTransform/>
+                    <av:RotateTransform Angle="0.687"/>
+                    <av:TranslateTransform/>
+                </av:TransformGroup>
+            </av:Label.RenderTransform>
+        </Label>
+        <TextBlock Name="ProcFile" TextAlignment="Right" HorizontalAlignment="Left" Margin="281,436,0,0" VerticalAlignment="Top" Height="25" Width="47" />
+        <TextBlock Name="ProcFull" TextAlignment="Right" HorizontalAlignment="Left" Margin="590,280,0,0" VerticalAlignment="Top" Height="25" Width="305" />
+        <Grid Name="LangGrid" HorizontalAlignment="Left" Height="49" Margin="818,4,0,0" VerticalAlignment="Top" Width="100" Visibility="Hidden">
+            <TextBlock Name="LangTitle" TextAlignment="Center" HorizontalAlignment="Left" Height="22.667" TextWrapping="Wrap" Text="ВЫБЕРИ ЯЗЫК" VerticalAlignment="Top" Width="187.334" FontFamily="Arial" FontWeight="Bold" Foreground="#FFF7F7F7" Margin="-38.667,0,-40.667,0" Visibility="Hidden" />
+            <RadioButton Name="RusRadio" Content="Rus" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource RadioLang}" Height="37" Margin="7,2,0,0" HorizontalAlignment="Left" Width="34" Checked="radioButton_RUS_Checked">
+                <Control.Background>
+                    <ImageBrush ImageSource="pictures/rus.png" />
+                </Control.Background>
+            </RadioButton>
+            <RadioButton Name="EngRadio" Content="Eng" HorizontalAlignment="Left" VerticalAlignment="Top" Height="37" Width="34" Cursor="Hand" Template="{DynamicResource RadioLang}" Margin="46,2,0,0" Checked="radioButton_ENG_Checked">
+                <Control.Background>
+                    <ImageBrush ImageSource="pictures/eng.png" />
+                </Control.Background>
+            </RadioButton>
+        </Grid>
+        <Label Name="FullSize" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="306,226,0,0" VerticalAlignment="Top" Width="88" />
+        <Label Name="Speed" HorizontalAlignment="Left" Margin="535,409,0,0" VerticalAlignment="Top" Width="146" Foreground="#FFFAD9A6" FontFamily="Philosopher" Content="{Binding DownloadSpeed}" Height="41" FontSize="10" FontWeight="Medium" />
+        <Label Name="Download_Information" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="110,427,0,0" VerticalAlignment="Top" Height="35" Width="202" FontFamily="Raleway" Foreground="#FFFAD9A6" FontWeight="Medium" FontSize="10" Content="{Binding DownloadInfo.GetLocStr}" RenderTransformOrigin="0.5,0.5" >
+            <av:Label.RenderTransform>
+                <av:TransformGroup>
+                    <av:ScaleTransform/>
+                    <av:SkewTransform/>
+                    <av:RotateTransform Angle="0.049"/>
+                    <av:TranslateTransform/>
+                </av:TransformGroup>
+            </av:Label.RenderTransform>
+        </Label>
+        <Button Name="Tray" Content="Tray" HorizontalAlignment="Left" Margin="965,50,0,0" VerticalAlignment="Top" Width="16" Cursor="Hand" Height="16" Template="{DynamicResource SimpleBackgroundTemplate}" Command="{Binding TrayCommand}" >
+            <av:Button.Background>
+                <av:ImageBrush ImageSource="pictures/rus.png"/>
+            </av:Button.Background>
+        </Button>
+        <Button Name="Exit" Content="Exit" HorizontalAlignment="Left" Margin="983,50,0,0" VerticalAlignment="Top" Width="16" Cursor="Hand" Height="16" Template="{DynamicResource SimpleBackgroundTemplate}" Command="{Binding ExitCommand}" >
+            <av:Button.Background>
+                <av:ImageBrush ImageSource="pictures/close.png"/>
+            </av:Button.Background>
+        </Button>
+        <Button Name="FileButton" Content="Tray" HorizontalAlignment="Left" Margin="476.584,52,0,0" VerticalAlignment="Top" Width="34" Cursor="Hand" Height="34" Template="{DynamicResource FileButton}" Visibility="Hidden" IsEnabled="{Binding IsSearching}" Background="{x:Null}" Click="FileButton_Click" />
+        <TextBlock Name="PathText" HorizontalAlignment="Left" Margin="348,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124" Foreground="#FFD48A12" FontSize="10" TextTrimming="CharacterEllipsis" Height="13" Visibility="Hidden" Text="{Binding SavePath}" />
+    </Grid>
+</Window>

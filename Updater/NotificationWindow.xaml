@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="Updater.NotificationWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local="clr-namespace:Updater" Title="NotificationWindow" Height="275" Width="475" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" AllowsTransparency="True" WindowStyle="None" Foreground="{x:Null}" MouseDown="Window_MouseDown">
+  <FrameworkElement.Resources>
+    <ResourceDictionary />
+  </FrameworkElement.Resources>
+  <Grid>
+    <TextBlock HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" FontFamily="BeaufortforLOL" FontSize="36" Foreground="#FFCD4F46" Height="52" Width="293" Margin="85,14,97,0" Text="{Binding Header}" />
+    <TextBlock HorizontalAlignment="Left" Margin="16,66,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="117" Width="442" Foreground="#FFCCCCCC" FontFamily="Gilroy Light" FontSize="20" TextAlignment="Justify" Text="{Binding Text}" />
+    <Button Name="CancelQuest" Content="Сancel" HorizontalAlignment="Right" Width="124" Height="50" VerticalAlignment="Top" Style="{DynamicResource ExitButtonStyle}" Template="{DynamicResource ButtonNotify}" FontSize="24" Cursor="Hand" Background="#00FFFFFF" Margin="0,196,88,0" Visibility="Hidden" BorderBrush="{x:Null}" Click="Button_Click_1" />
+    <Button Name="OkQuest" Content="OK" HorizontalAlignment="Right" Width="124" Height="50" VerticalAlignment="Top" Style="{DynamicResource ExitButtonStyle}" Template="{DynamicResource ButtonNotify}" FontSize="24" Cursor="Hand" Background="#00FFFFFF" Margin="0,196,246,0" Visibility="Hidden" BorderBrush="{x:Null}" Click="Button_Click" />
+    <Button Name="OKInfo" Content="OK" HorizontalAlignment="Right" Width="124" Height="50" VerticalAlignment="Top" Style="{DynamicResource ExitButtonStyle}" Template="{DynamicResource ButtonNotify}" FontSize="24" Cursor="Hand" Background="#00FFFFFF" Margin="0,196,165,0" BorderBrush="{x:Null}" Click="Button_Click_1" />
+  </Grid>
+</Window>
