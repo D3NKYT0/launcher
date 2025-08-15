@@ -30,7 +30,19 @@ Aplicação WPF que gerencia downloads, atualizações e execução do cliente L
 
 ## Configuração
 
-Edite `appsettings.json` para personalizar:
+O launcher agora usa configurações embutidas no código, eliminando a necessidade do arquivo `appsettings.json`. 
+
+### Configurações Padrão
+
+As configurações padrão estão embutidas no código e incluem:
+- URLs do servidor PDL
+- Configurações de download e atualização
+- Links para redes sociais
+- Configurações de segurança
+
+### Configuração Personalizada (Opcional)
+
+Para personalizar as configurações, você pode criar um arquivo `launcher_config.json` no mesmo diretório do executável:
 
 ```json
 {
@@ -38,9 +50,17 @@ Edite `appsettings.json` para personalizar:
     "UpdateUrl": "https://seu-servidor.com/update/",
     "GameStartPath": "system",
     "MaxRetryAttempts": 3
+  },
+  "Links": {
+    "Site": "https://seu-servidor.com",
+    "Discord": "https://discord.gg/seuserver"
   }
 }
 ```
+
+Se o arquivo não existir, o launcher usará as configurações embutidas automaticamente.
+
+**Exemplo de configuração:** Veja o arquivo `launcher_config_example.json` para um exemplo completo de como personalizar todas as configurações.
 
 ## Estrutura do Projeto
 
@@ -54,7 +74,7 @@ L2Updater/
 │   ├── HashCalc/       # Cálculo de hash
 │   └── Localization/   # Arquivos de idioma
 ├── App.xaml.cs         # Ponto de entrada
-└── appsettings.json    # Configurações
+└── launcher_config.json # Configurações opcionais
 ```
 
 ## Build

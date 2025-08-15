@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Windows;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -58,30 +56,10 @@ namespace L2Updater
             }
         }
 
-        private IConfiguration GetConfiguration()
-        {
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
-            
-            #if DEBUG
-            environment = "Development";
-            #endif
-            
-            return new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
-                .Build();
-        }
-
         private void ConfigureServices(IServiceCollection services)
         {
-            // Configuration
-            var configuration = GetConfiguration();
-            services.AddSingleton<IConfiguration>(configuration);
-
-            // Settings
-            var appSettings = new AppSettings();
-            configuration.Bind(appSettings);
+            // Settings - Usando ConfigurationManager para carregar configurações
+            var appSettings = ConfigurationManager.LoadSettings();
             services.AddSingleton(appSettings);
 
             // Logging

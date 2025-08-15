@@ -19,8 +19,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Serilog" Version="4.0.0" />
@@ -40,7 +38,6 @@
 
   <ItemGroup>
     <None Remove="l2.ico" />
-    <None Remove="appsettings.json" />
     <None Remove="Updater\pictures\background.png" />
 
     <None Remove="Updater\pictures\button.png" />
@@ -62,11 +59,7 @@
     <None Remove="Updater\pictures\checkdisable.png" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
 
   <ItemGroup>
     <Resource Include="l2.ico" />
