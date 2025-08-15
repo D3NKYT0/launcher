@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <None Remove="l2.ico" />
+    <None Remove="appsettings.json" />
     <None Remove="Updater\pictures\background.png" />
 
     <None Remove="Updater\pictures\button.png" />
@@ -60,6 +61,12 @@
     <None Remove="Updater\pictures\start_press.png" />
     <None Remove="Updater\pictures\vector.png" />
     <None Remove="Updater\pictures\checkdisable.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
