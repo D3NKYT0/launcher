@@ -21,7 +21,7 @@ namespace Updater.Models
                     MaxRetryAttempts = 3,
                     RetryDelaySeconds = 5,
                     DownloadTimeoutSeconds = 300,
-                    MaxConcurrentDownloads = 3,
+                    MaxConcurrentDownloads = 1, // Reduzido para 1 para evitar problemas de concorrência
                     AutoCloseGameProcesses = true,
                     ProcessCloseTimeoutMs = 5000,
                     ProcessKillTimeoutMs = 2000

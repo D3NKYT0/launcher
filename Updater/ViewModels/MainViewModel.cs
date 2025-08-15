@@ -33,13 +33,13 @@ namespace Updater.ViewModels
         private LocString _downloadInfo = new("", "");
 
         [ObservableProperty]
-        private double _progressFull;
+        private double _progressFull = 0;
 
         [ObservableProperty]
         private double _maxProgressFull = 100;
 
         [ObservableProperty]
-        private double _progressFile;
+        private double _progressFile = 0;
 
         [ObservableProperty]
         private double _maxProgressFile = 100;
@@ -74,6 +74,9 @@ namespace Updater.ViewModels
         [ObservableProperty]
         private bool _isSearching;
 
+        [ObservableProperty]
+        private bool _showProgressBars = true;
+
         public MainViewModel(
             ILogger<MainViewModel> logger,
             IUpdateService updateService,
@@ -84,6 +87,15 @@ namespace Updater.ViewModels
             _updateService = updateService;
             _securityService = securityService;
             _settings = settings;
+            
+            _logger.LogInformation("MainViewModel initialized with ProgressFile: {ProgressFile}, ProgressFull: {ProgressFull}", ProgressFile, ProgressFull);
+            
+            // Initialize progress bars with default values
+            ProgressFile = 0;
+            ProgressFull = 0;
+            ShowProgressBars = true;
+            
+            _logger.LogInformation("Progress bars initialized: ProgressFile={ProgressFile}, ProgressFull={ProgressFull}, ShowProgressBars={ShowProgressBars}", ProgressFile, ProgressFull, ShowProgressBars);
         }
 
         [RelayCommand]
@@ -205,6 +217,8 @@ namespace Updater.ViewModels
                 Application.Current.MainWindow.WindowState = WindowState.Minimized;
             }
         }
+
+
 
 
 
@@ -339,6 +353,9 @@ namespace Updater.ViewModels
 
         private void OnUpdateProgress(UpdateProgress progress)
         {
+            _logger.LogInformation("OnUpdateProgress called: ProgressFile={ProgressFile}, ProgressFull={ProgressFull}", 
+                progress.DownloadProgressPercentage, progress.ProgressPercentage);
+            
             CurrentFile = progress.CurrentFile;
             TotalFiles = progress.TotalFiles;
             DownloadedBytes = progress.BytesDownloaded;
@@ -347,6 +364,8 @@ namespace Updater.ViewModels
             ProgressFull = progress.ProgressPercentage;
             ProgressFile = progress.DownloadProgressPercentage;
             DownloadInfo = new LocString(progress.Status, progress.Status);
+            
+            _logger.LogInformation("Progress updated: ProgressFile={ProgressFile}, ProgressFull={ProgressFull}", ProgressFile, ProgressFull);
         }
 
         private static string GetDefaultGamePath()

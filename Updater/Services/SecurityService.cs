@@ -13,13 +13,13 @@ namespace Updater.Services
     {
         private readonly ILogger<SecurityService> _logger;
         private readonly AppSettings _settings;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public SecurityService(ILogger<SecurityService> logger, AppSettings settings, HttpClient httpClient)
+        public SecurityService(ILogger<SecurityService> logger, AppSettings settings, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _settings = settings;
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<bool> ValidateFileSignatureAsync(string filePath)
@@ -103,11 +103,20 @@ namespace Updater.Services
         {
             try
             {
-                using var sha256 = SHA256.Create();
+                // Use CRC32 to match server hash format
+                var crc32 = new Updater.HashCalc.Crc32();
+                string result = string.Empty;
+                
                 // Use FileShare.ReadWrite to allow other processes to read/write while we calculate hash
-                using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                var hash = await sha256.ComputeHashAsync(stream);
-                return Convert.ToHexString(hash).ToLowerInvariant();
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    foreach (byte b in crc32.ComputeHash(fs))
+                    {
+                        result += b.ToString("x2").ToLower();
+                    }
+                }
+                
+                return result;
             }
             catch (IOException ex) when (ex.Message.Contains("being used by another process"))
             {

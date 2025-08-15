@@ -64,12 +64,9 @@
             </av:Button.Background>
         </Button>
         <Button Name="StartButton" Content="" HorizontalAlignment="Left" Margin="450,424,0,0" VerticalAlignment="Top" Template="{DynamicResource StartButtonPictureTemplate}" FontSize="24" Cursor="Hand" Command="{Binding StartGameCommand}" Foreground="{x:Null}" BorderBrush="{x:Null}" Width="215" Height="70" Background="{x:Null}" RenderTransformOrigin="0.504,0.508" />
-        <ProgressBar Name="FileProgress" HorizontalAlignment="Left" Height="6" Margin="807,455,0,0" VerticalAlignment="Top" Width="181" Value="{Binding ProgressFile}" Maximum="{Binding MaxProgressFile}" Background="{x:Null}" BorderBrush="{x:Null}">
-            <Control.Foreground>
-                <ImageBrush ImageSource="pictures/progress.png" />
-            </Control.Foreground>
+        <ProgressBar Name="FileProgress" HorizontalAlignment="Left" Height="6" Margin="807,455,0,0" VerticalAlignment="Top" Width="181" Value="{Binding ProgressFile}" Maximum="{Binding MaxProgressFile}" Background="#FFE6E6E6" BorderBrush="#FFBCBCBC" BorderThickness="1" Foreground="#FF06B025" Visibility="{Binding ShowProgressBars, Converter={StaticResource BooleanToVisibilityConverter}}" Opacity="1">
         </ProgressBar>
-        <ProgressBar Name="FullProgress" HorizontalAlignment="Left" Height="6" Margin="128,454,0,0" VerticalAlignment="Top" Width="169" Value="{Binding ProgressFull}" Maximum="{Binding MaxProgressFull}" BorderBrush="{x:Null}" Background="{x:Null}" RenderTransformOrigin="0.5,0.5">
+        <ProgressBar Name="FullProgress" HorizontalAlignment="Left" Height="6" Margin="128,454,0,0" VerticalAlignment="Top" Width="169" Value="{Binding ProgressFull}" Maximum="{Binding MaxProgressFull}" BorderBrush="#FFBCBCBC" Background="#FFE6E6E6" BorderThickness="1" Foreground="#FF06B025" RenderTransformOrigin="0.5,0.5" Visibility="{Binding ShowProgressBars, Converter={StaticResource BooleanToVisibilityConverter}}" Opacity="1">
             <av:ProgressBar.RenderTransform>
                 <av:TransformGroup>
                     <av:ScaleTransform/>
@@ -78,9 +75,6 @@
                     <av:TranslateTransform/>
                 </av:TransformGroup>
             </av:ProgressBar.RenderTransform>
-            <Control.Foreground>
-                <ImageBrush ImageSource="pictures/progress2.png" />
-            </Control.Foreground>
         </ProgressBar>
         <Label Name="Information" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="795,424,0,0" VerticalAlignment="Top" Height="22" Width="197" FontFamily="Raleway" Foreground="#CFEEE8E0" FontWeight="Medium" FontSize="11" Content="{Binding Info.GetLocStr}" RenderTransformOrigin="0.5,0.5" >
             <av:Label.RenderTransform>
@@ -92,8 +86,8 @@
                 </av:TransformGroup>
             </av:Label.RenderTransform>
         </Label>
-        <TextBlock Name="ProcFile" TextAlignment="Right" HorizontalAlignment="Left" Margin="281,436,0,0" VerticalAlignment="Top" Height="25" Width="47" />
-        <TextBlock Name="ProcFull" TextAlignment="Right" HorizontalAlignment="Left" Margin="590,280,0,0" VerticalAlignment="Top" Height="25" Width="305" />
+        <TextBlock Name="ProcFile" TextAlignment="Center" HorizontalAlignment="Left" Margin="807,465,0,0" VerticalAlignment="Top" Height="25" Width="181" Text="{Binding ProgressFile, StringFormat='{}{0:F1}%'}" Foreground="White" FontSize="10" />
+        <TextBlock Name="ProcFull" TextAlignment="Center" HorizontalAlignment="Left" Margin="128,464,0,0" VerticalAlignment="Top" Height="25" Width="169" Text="{Binding ProgressFull, StringFormat='{}{0:F1}%'}" Foreground="White" FontSize="10" />
         <Grid Name="LangGrid" HorizontalAlignment="Left" Height="49" Margin="818,4,0,0" VerticalAlignment="Top" Width="100" Visibility="Hidden">
             <TextBlock Name="LangTitle" TextAlignment="Center" HorizontalAlignment="Left" Height="22.667" TextWrapping="Wrap" Text="ВЫБЕРИ ЯЗЫК" VerticalAlignment="Top" Width="187.334" FontFamily="Arial" FontWeight="Bold" Foreground="#FFF7F7F7" Margin="-38.667,0,-40.667,0" Visibility="Hidden" />
             <RadioButton Name="RusRadio" Content="Rus" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource RadioLang}" Height="37" Margin="7,2,0,0" HorizontalAlignment="Left" Width="34" Checked="radioButton_RUS_Checked">
@@ -129,7 +123,9 @@
                 <av:ImageBrush ImageSource="pictures/close.png"/>
             </av:Button.Background>
         </Button>
+
         <Button Name="FileButton" Content="Tray" HorizontalAlignment="Left" Margin="476.584,52,0,0" VerticalAlignment="Top" Width="34" Cursor="Hand" Height="34" Template="{DynamicResource FileButton}" Visibility="Hidden" IsEnabled="{Binding IsSearching}" Background="{x:Null}" Click="FileButton_Click" />
         <TextBlock Name="PathText" HorizontalAlignment="Left" Margin="348,57,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="124" Foreground="#FFD48A12" FontSize="10" TextTrimming="CharacterEllipsis" Height="13" Visibility="Hidden" Text="{Binding SavePath}" />
+
     </Grid>
 </Window>

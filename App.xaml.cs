@@ -69,7 +69,23 @@ namespace L2Updater
                 builder.AddSerilog(dispose: true);
             });
 
-            // HTTP Client
+            // HTTP Client - Configuração melhorada para evitar problemas de concorrência
+            services.AddHttpClient("UpdateClient", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(appSettings.UpdateSettings.DownloadTimeoutSeconds);
+                client.DefaultRequestHeaders.Add("User-Agent", "L2Updater/1.0");
+                client.DefaultRequestHeaders.Add("Accept", "*/*");
+                client.DefaultRequestHeaders.Add("Connection", "keep-alive");
+            }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate,
+                AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 3,
+                UseCookies = false,
+                UseProxy = false
+            });
+
+            // Registrar HttpClient padrão também para compatibilidade
             services.AddHttpClient();
 
             // Services

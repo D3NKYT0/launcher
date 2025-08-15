@@ -16,18 +16,18 @@ namespace Updater.Services
     public class UpdateService : IUpdateService
     {
         private readonly ILogger<UpdateService> _logger;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ISecurityService _securityService;
         private readonly AppSettings _settings;
 
         public UpdateService(
             ILogger<UpdateService> logger,
-            HttpClient httpClient,
+            IHttpClientFactory httpClientFactory,
             ISecurityService securityService,
             AppSettings settings)
         {
             _logger = logger;
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
             _securityService = securityService;
             _settings = settings;
         }
@@ -58,8 +58,52 @@ namespace Updater.Services
             }
         }
 
+        private HttpClient CreateHttpClient()
+        {
+            var client = _httpClientFactory.CreateClient("UpdateClient");
+            
+            // Adicionar headers únicos para cada requisição para evitar cache
+            client.DefaultRequestHeaders.Remove("X-Request-ID");
+            client.DefaultRequestHeaders.Add("X-Request-ID", Guid.NewGuid().ToString());
+            client.DefaultRequestHeaders.Remove("Cache-Control");
+            client.DefaultRequestHeaders.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+            client.DefaultRequestHeaders.Remove("Pragma");
+            client.DefaultRequestHeaders.Add("Pragma", "no-cache");
+            
+            return client;
+        }
 
+        private async Task<bool> ValidateDownloadedFileAsync(string filePath, string expectedHash, string fileName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(expectedHash))
+                {
+                    _logger.LogDebug("No hash provided for {FileName}, skipping validation", fileName);
+                    return true;
+                }
 
+                var actualHash = await _securityService.CalculateFileHashAsync(filePath);
+                var isValid = string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase);
+
+                if (!isValid)
+                {
+                    _logger.LogWarning("File integrity check failed for {FileName}. Expected: {ExpectedHash}, Actual: {ActualHash}", 
+                        fileName, expectedHash, actualHash);
+                }
+                else
+                {
+                    _logger.LogDebug("File integrity check passed for {FileName}", fileName);
+                }
+
+                return isValid;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating file integrity for {FileName}", fileName);
+                return false;
+            }
+        }
 
 
         public async Task<UpdateInfoModel> GetUpdateInfoAsync(string updateUrl, CancellationToken cancellationToken = default)
@@ -69,8 +113,9 @@ namespace Updater.Services
                 _logger.LogInformation("Fetching update info from {UpdateUrl}", updateUrl);
                 
                 // Log the HttpClient configuration
-                _logger.LogDebug("HttpClient timeout: {Timeout}", _httpClient.Timeout);
-                _logger.LogDebug("HttpClient base address: {BaseAddress}", _httpClient.BaseAddress);
+                using var httpClient = CreateHttpClient();
+                _logger.LogDebug("HttpClient timeout: {Timeout}", httpClient.Timeout);
+                _logger.LogDebug("HttpClient base address: {BaseAddress}", httpClient.BaseAddress);
                 
                 if (!_securityService.ValidateCertificate(updateUrl))
                 {
@@ -91,7 +136,7 @@ namespace Updater.Services
                 _logger.LogDebug("URL parsed successfully: {Scheme}://{Host}:{Port}{PathAndQuery}", 
                     testUri.Scheme, testUri.Host, testUri.Port, testUri.PathAndQuery);
                 
-                var response = await _httpClient.GetStringAsync(url, cancellationToken);
+                var response = await httpClient.GetStringAsync(url, cancellationToken);
                 
                 // Use XmlSerializer for XML parsing
                 var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UpdateInfoModel));
@@ -105,13 +150,8 @@ namespace Updater.Services
 
                 _logger.LogInformation("Successfully fetched update info with {FileCount} files", 
                     GetTotalFileCount(updateInfo.Folder));
-
+                
                 return updateInfo;
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Network error fetching update info from {UpdateUrl}. Please check your internet connection and server availability.", updateUrl);
-                throw new InvalidOperationException($"Network error: {ex.Message}. Please check your internet connection and server availability.", ex);
             }
             catch (TaskCanceledException ex)
             {
@@ -131,26 +171,22 @@ namespace Updater.Services
             {
                 _logger.LogInformation("Fetching update config from {UpdateUrl}", updateUrl);
                 
-                if (!_securityService.ValidateCertificate(updateUrl))
-                {
-                    throw new InvalidOperationException($"Invalid certificate for URL: {updateUrl}");
-                }
-
                 var url = CombineUrl(updateUrl, "UpdateConfig.xml");
-                var response = await _httpClient.GetStringAsync(url, cancellationToken);
+                using var httpClient = CreateHttpClient();
+                var response = await httpClient.GetStringAsync(url, cancellationToken);
                 
                 // Use XmlSerializer for XML parsing
                 var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UpdateConfig));
                 using var reader = new StringReader(response);
-                var updateConfig = (UpdateConfig?)serializer.Deserialize(reader);
+                var config = (UpdateConfig?)serializer.Deserialize(reader);
 
-                if (updateConfig == null)
+                if (config == null)
                 {
                     throw new InvalidOperationException("Failed to deserialize update config");
                 }
 
                 _logger.LogInformation("Successfully fetched update config");
-                return updateConfig;
+                return config;
             }
             catch (Exception ex)
             {
@@ -163,23 +199,34 @@ namespace Updater.Services
         {
             try
             {
+                _logger.LogInformation("Checking for self-update from {UpdateUrl}", updateUrl);
+                
                 var url = CombineUrl(updateUrl, "updaterver.txt");
-                var response = await _httpClient.GetStringAsync(url, cancellationToken);
+                using var httpClient = CreateHttpClient();
+                var response = await httpClient.GetStringAsync(url, cancellationToken);
                 
                 if (int.TryParse(response.Trim(), out var remoteVersion))
                 {
-                    var hasUpdate = remoteVersion > _settings.UpdateSettings.UpdaterVersion;
-                    _logger.LogInformation("Self-update check: Current={CurrentVersion}, Remote={RemoteVersion}, HasUpdate={HasUpdate}", 
-                        _settings.UpdateSettings.UpdaterVersion, remoteVersion, hasUpdate);
-                    return hasUpdate;
+                    var currentVersion = _settings.UpdateSettings.UpdaterVersion;
+                    
+                    if (remoteVersion > currentVersion)
+                    {
+                        _logger.LogInformation("Self-update available: current={CurrentVersion}, remote={RemoteVersion}", 
+                            currentVersion, remoteVersion);
+                        return true;
+                    }
+                    else
+                    {
+                        _logger.LogDebug("No self-update needed: current={CurrentVersion}, remote={RemoteVersion}", 
+                            currentVersion, remoteVersion);
+                        return false;
+                    }
                 }
-
-                return false;
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                _logger.LogInformation("Self-update file not found at {UpdateUrl}/updaterver.txt - skipping self-update check", updateUrl);
-                return false;
+                else
+                {
+                    _logger.LogWarning("Invalid version format in response: {Response}", response);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
@@ -199,7 +246,8 @@ namespace Updater.Services
                 
                 // Download new updater
                 var downloadUrl = CombineUrl(updateUrl, updaterFileName);
-                using var response = await _httpClient.GetAsync(downloadUrl, cancellationToken);
+                using var httpClient = CreateHttpClient();
+                using var response = await httpClient.GetAsync(downloadUrl, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 
                 using var fileStream = File.Create(tempPath);
@@ -399,6 +447,8 @@ namespace Updater.Services
             var downloadUrl = CombineUrl(updateUrl, file.Path);
             var localPath = Path.Combine(savePath, file.SavePath, file.Name);
             
+            _logger.LogDebug("Downloading file: {FileName} from {DownloadUrl} to {LocalPath}", file.Name, downloadUrl, localPath);
+            
             // Ensure directory exists
             var directory = Path.GetDirectoryName(localPath);
             if (!string.IsNullOrEmpty(directory))
@@ -424,19 +474,35 @@ namespace Updater.Services
                 }
             }
 
-            using var response = await _httpClient.GetAsync(downloadUrl, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            // Create a new HttpClient instance for this download to avoid state sharing
+            using var httpClient = CreateHttpClient();
+            
+            try
+            {
+                using var response = await httpClient.GetAsync(downloadUrl, cancellationToken);
+                response.EnsureSuccessStatusCode();
 
-            // Use FileShare.ReadWrite to allow other processes to read while we write
-            using var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
-            await response.Content.CopyToAsync(fileStream, cancellationToken);
+                // Use FileShare.ReadWrite to allow other processes to read while we write
+                using var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
+                await response.Content.CopyToAsync(fileStream, cancellationToken);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP error downloading {FileName} from {Url}", file.Name, downloadUrl);
+                throw new InvalidOperationException($"Failed to download {file.Name}: {ex.Message}", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Timeout downloading {FileName} from {Url}", file.Name, downloadUrl);
+                throw new InvalidOperationException($"Timeout downloading {file.Name}", ex);
+            }
 
             // Validate file integrity if hash is provided
             if (!string.IsNullOrEmpty(file.Hash))
             {
                 try
                 {
-                    if (!await _securityService.ValidateFileIntegrityAsync(localPath, file.Hash))
+                    if (!await ValidateDownloadedFileAsync(localPath, file.Hash, file.Name))
                     {
                         try
                         {
