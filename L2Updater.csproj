@@ -47,27 +47,18 @@
     <None Remove="Updater\pictures\button2.png" />
     <None Remove="Updater\pictures\button_hover.png" />
     <None Remove="Updater\pictures\button_press.png" />
-    <None Remove="Updater\pictures\chekl.png" />
     <None Remove="Updater\pictures\close.png" />
     <None Remove="Updater\pictures\close_hover.png" />
-    <None Remove="Updater\pictures\dom.png" />
-    <None Remove="Updater\pictures\donate.png" />
     <None Remove="Updater\pictures\eng.png" />
     <None Remove="Updater\pictures\l2.ico" />
-    <None Remove="Updater\pictures\logo.ico" />
-    <None Remove="Updater\pictures\logo.png" />
     <None Remove="Updater\pictures\progress.png" />
     <None Remove="Updater\pictures\progress2.png" />
     <None Remove="Updater\pictures\progressblue.png" />
     <None Remove="Updater\pictures\progressred.png" />
-    <None Remove="Updater\pictures\progress_down.png" />
-    <None Remove="Updater\pictures\progress_up.png" />
     <None Remove="Updater\pictures\rus.png" />
-    <None Remove="Updater\pictures\shaiba.png" />
     <None Remove="Updater\pictures\start.png" />
     <None Remove="Updater\pictures\start_hover.png" />
     <None Remove="Updater\pictures\start_press.png" />
-    <None Remove="Updater\pictures\vector.png" />
     <None Remove="Updater\pictures\checkdisable.png" />
   </ItemGroup>
 
@@ -85,27 +76,18 @@
     <Resource Include="Updater\pictures\button2.png" />
     <Resource Include="Updater\pictures\button_hover.png" />
     <Resource Include="Updater\pictures\button_press.png" />
-    <Resource Include="Updater\pictures\chekl.png" />
     <Resource Include="Updater\pictures\close.png" />
     <Resource Include="Updater\pictures\close_hover.png" />
-    <Resource Include="Updater\pictures\dom.png" />
-    <Resource Include="Updater\pictures\donate.png" />
     <Resource Include="Updater\pictures\eng.png" />
     <Resource Include="Updater\pictures\l2.ico" />
-    <Resource Include="Updater\pictures\logo.ico" />
-    <Resource Include="Updater\pictures\logo.png" />
     <Resource Include="Updater\pictures\progress.png" />
     <Resource Include="Updater\pictures\progress2.png" />
     <Resource Include="Updater\pictures\progressblue.png" />
     <Resource Include="Updater\pictures\progressred.png" />
-    <Resource Include="Updater\pictures\progress_down.png" />
-    <Resource Include="Updater\pictures\progress_up.png" />
     <Resource Include="Updater\pictures\rus.png" />
-    <Resource Include="Updater\pictures\shaiba.png" />
     <Resource Include="Updater\pictures\start.png" />
     <Resource Include="Updater\pictures\start_hover.png" />
     <Resource Include="Updater\pictures\start_press.png" />
-    <Resource Include="Updater\pictures\vector.png" />
     <Resource Include="Updater\pictures\checkdisable.png" />
   </ItemGroup>
 
