@@ -32,7 +32,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo [4/4] Gerando executavel unico...
-dotnet publish --configuration Release --runtime win-x64 --self-contained false --output "publish" --verbosity normal
+dotnet publish --configuration Release --runtime win-x64 --self-contained false --verbosity normal
 if %errorlevel% neq 0 (
     echo ERRO: Falha ao gerar o executavel
     pause
@@ -45,12 +45,12 @@ echo    BUILD CONCLUIDO COM SUCESSO!
 echo ========================================
 echo.
 echo Arquivo executavel gerado em:
-echo %cd%\publish\L2Updater.exe
+echo %cd%\bin\Release\net9.0-windows\win-x64\publish\L2Updater.exe
 echo.
 echo Tamanho do arquivo:
-dir "publish\L2Updater.exe" | find "L2Updater.exe"
+dir "bin\Release\net9.0-windows\win-x64\publish\L2Updater.exe" | find "L2Updater.exe"
 echo.
 echo Para executar o launcher:
-echo publish\L2Updater.exe
+echo bin\Release\net9.0-windows\win-x64\publish\L2Updater.exe
 echo.
 pause

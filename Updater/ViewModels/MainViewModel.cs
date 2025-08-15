@@ -89,7 +89,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private async Task StartQuickUpdateAsync()
         {
-            WriteLocalLog("StartQuickUpdateAsync command executed");
             _logger.LogInformation("StartQuickUpdateAsync command executed");
             await StartUpdateAsync(UpdateTypes.Quick);
         }
@@ -97,7 +96,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private async Task StartFullUpdateAsync()
         {
-            WriteLocalLog("StartFullUpdateAsync command executed");
             _logger.LogInformation("StartFullUpdateAsync command executed");
             await StartUpdateAsync(UpdateTypes.Full);
         }
@@ -105,7 +103,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private async Task StartGameAsync()
         {
-            WriteLocalLog("StartGameAsync command executed");
             _logger.LogInformation("StartGameAsync command executed");
             try
             {
@@ -159,7 +156,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private void CancelUpdate()
         {
-            WriteLocalLog("CancelUpdate command executed");
             _logger.LogInformation("CancelUpdate command executed");
             _cancellationTokenSource?.Cancel();
         }
@@ -167,7 +163,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private void Exit()
         {
-            WriteLocalLog("Exit command executed");
             _logger.LogInformation("Exit command executed");
             Application.Current.Shutdown();
         }
@@ -175,7 +170,6 @@ namespace Updater.ViewModels
         [RelayCommand]
         private void Tray()
         {
-            WriteLocalLog("Tray command executed");
             _logger.LogInformation("Tray command executed");
             // Implement tray functionality here
             // For now, just minimize the window
@@ -185,19 +179,7 @@ namespace Updater.ViewModels
             }
         }
 
-        private void WriteLocalLog(string message)
-        {
-            try
-            {
-                var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug.log");
-                var logMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}{Environment.NewLine}";
-                File.AppendAllText(logPath, logMessage);
-            }
-            catch
-            {
-                // Ignore log writing errors
-            }
-        }
+
 
         [RelayCommand]
         private void OpenWebsite()
