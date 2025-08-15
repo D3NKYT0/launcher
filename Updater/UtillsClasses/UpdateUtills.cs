@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Updater.DataContractModels;
 using Updater.HashCalc;
 using Updater.Models;
+using System;
 
 namespace Updater.UtillsClasses
 {
@@ -31,15 +32,30 @@ namespace Updater.UtillsClasses
 			}
 			if (file.CheckHash || postCheck)
 			{
-				long length = new FileInfo(text).Length;
-				if (length != file.Size)
+				try
 				{
+					long length = new FileInfo(text).Length;
+					if (length != file.Size)
+					{
+						return false;
+					}
+					Crc32 crc = new Crc32();
+					// Use FileShare.ReadWrite to allow other processes to read/write while we check hash
+					string a = crc.Get(text);
+					if (a != file.Hash)
+					{
+						return false;
+					}
+				}
+				catch (IOException ex) when (ex.Message.Contains("being used by another process"))
+				{
+					// If file is in use, assume it needs to be updated to be safe
 					return false;
 				}
-				Crc32 crc = new Crc32();
-				string a = crc.Get(text);
-				if (a != file.Hash)
+				catch (Exception ex)
 				{
+					// Log error and assume file needs update
+					System.Diagnostics.Debug.WriteLine($"Error checking file {text}: {ex.Message}");
 					return false;
 				}
 			}

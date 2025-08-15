@@ -406,23 +406,141 @@ namespace Updater.Services
                 Directory.CreateDirectory(directory);
             }
 
+            // Try to close any processes that might be using the file
+            await TryCloseFileProcessesAsync(localPath);
+
+            // Try to delete existing file if it exists and is not in use
+            if (File.Exists(localPath))
+            {
+                try
+                {
+                    // Try to delete with retry mechanism
+                    await DeleteFileWithRetryAsync(localPath, maxRetries: 3, delayMs: 1000);
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogWarning(ex, "Cannot delete existing file {FilePath}, will try to overwrite", localPath);
+                    // Continue with download attempt - File.Create will overwrite if possible
+                }
+            }
+
             using var response = await _httpClient.GetAsync(downloadUrl, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            using var fileStream = File.Create(localPath);
+            // Use FileShare.ReadWrite to allow other processes to read while we write
+            using var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
             await response.Content.CopyToAsync(fileStream, cancellationToken);
 
             // Validate file integrity if hash is provided
             if (!string.IsNullOrEmpty(file.Hash))
             {
-                if (!await _securityService.ValidateFileIntegrityAsync(localPath, file.Hash))
+                try
                 {
-                    File.Delete(localPath);
-                    throw new InvalidOperationException($"File integrity check failed for {file.Name}");
+                    if (!await _securityService.ValidateFileIntegrityAsync(localPath, file.Hash))
+                    {
+                        try
+                        {
+                            File.Delete(localPath);
+                        }
+                        catch (IOException ex)
+                        {
+                            _logger.LogWarning(ex, "Cannot delete corrupted file {FilePath}", localPath);
+                        }
+                        throw new InvalidOperationException($"File integrity check failed for {file.Name}");
+                    }
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogWarning(ex, "Cannot validate file integrity for {FilePath}, skipping validation", localPath);
+                    // Continue without validation if file is in use
                 }
             }
 
             _logger.LogDebug("Successfully downloaded {FileName} to {LocalPath}", file.Name, localPath);
+        }
+
+        private async Task DeleteFileWithRetryAsync(string filePath, int maxRetries, int delayMs)
+        {
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    return;
+                }
+                catch (IOException) when (attempt < maxRetries)
+                {
+                    await Task.Delay(delayMs);
+                }
+            }
+            throw new IOException($"Failed to delete file after {maxRetries} attempts: {filePath}");
+        }
+
+        private async Task TryCloseFileProcessesAsync(string filePath)
+        {
+            try
+            {
+                // Check if auto-close is enabled
+                if (!_settings.UpdateSettings.AutoCloseGameProcesses)
+                {
+                    _logger.LogDebug("Auto-close game processes is disabled");
+                    return;
+                }
+
+                var fileName = Path.GetFileName(filePath);
+                
+                // List of common game processes that might be using the files
+                var gameProcessNames = new[] { "L2.exe", "l2.exe", "Lineage2.exe", "lineage2.exe" };
+                
+                if (gameProcessNames.Contains(fileName, StringComparer.OrdinalIgnoreCase))
+                {
+                    _logger.LogInformation("Attempting to close game processes before updating {FileName}", fileName);
+                    
+                    var processes = System.Diagnostics.Process.GetProcessesByName("L2")
+                        .Concat(System.Diagnostics.Process.GetProcessesByName("Lineage2"))
+                        .Concat(System.Diagnostics.Process.GetProcessesByName("l2"))
+                        .Distinct();
+
+                    foreach (var process in processes)
+                    {
+                        try
+                        {
+                            if (!process.HasExited)
+                            {
+                                _logger.LogInformation("Closing process {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
+                                process.CloseMainWindow();
+                                
+                                // Wait for process to close gracefully using configured timeout
+                                var closeTimeout = _settings.UpdateSettings.ProcessCloseTimeoutMs;
+                                if (!process.WaitForExit(closeTimeout))
+                                {
+                                    _logger.LogWarning("Process {ProcessName} (PID: {ProcessId}) did not close gracefully, forcing termination", process.ProcessName, process.Id);
+                                    process.Kill();
+                                    
+                                    // Wait for process to be killed using configured timeout
+                                    var killTimeout = _settings.UpdateSettings.ProcessKillTimeoutMs;
+                                    process.WaitForExit(killTimeout);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Error closing process {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
+                        }
+                        finally
+                        {
+                            process.Dispose();
+                        }
+                    }
+                    
+                    // Give some time for processes to fully close
+                    await Task.Delay(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error attempting to close file processes for {FilePath}", filePath);
+            }
         }
 
         private int GetTotalFileCount(FolderModel folder)

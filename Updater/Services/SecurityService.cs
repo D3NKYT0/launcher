@@ -104,9 +104,15 @@ namespace Updater.Services
             try
             {
                 using var sha256 = SHA256.Create();
-                using var stream = File.OpenRead(filePath);
+                // Use FileShare.ReadWrite to allow other processes to read/write while we calculate hash
+                using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 var hash = await sha256.ComputeHashAsync(stream);
                 return Convert.ToHexString(hash).ToLowerInvariant();
+            }
+            catch (IOException ex) when (ex.Message.Contains("being used by another process"))
+            {
+                _logger.LogWarning("File {FilePath} is being used by another process, cannot calculate hash", filePath);
+                throw;
             }
             catch (Exception ex)
             {

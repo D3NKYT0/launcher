@@ -112,12 +112,20 @@ namespace Updater.HashCalc
 		{
 			Crc32 crc = new Crc32();
 			string result = string.Empty;
-			using (FileStream fs = File.Open(FilePath, FileMode.Open))
+			try
 			{
-				foreach (byte b in crc.ComputeHash(fs))
+				// Use FileShare.ReadWrite to allow other processes to read/write while we calculate hash
+				using (FileStream fs = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
 				{
-					result += b.ToString("x2").ToLower();
+					foreach (byte b in crc.ComputeHash(fs))
+					{
+						result += b.ToString("x2").ToLower();
+					}
 				}
+			}
+			catch (IOException ex) when (ex.Message.Contains("being used by another process"))
+			{
+				throw new IOException($"File {FilePath} is being used by another process", ex);
 			}
 			return result;
 		}

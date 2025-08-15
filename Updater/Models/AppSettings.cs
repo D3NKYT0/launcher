@@ -23,6 +23,9 @@ namespace Updater.Models
         public int RetryDelaySeconds { get; set; } = 5;
         public int DownloadTimeoutSeconds { get; set; } = 300;
         public int MaxConcurrentDownloads { get; set; } = 3;
+        public bool AutoCloseGameProcesses { get; set; } = true;
+        public int ProcessCloseTimeoutMs { get; set; } = 5000;
+        public int ProcessKillTimeoutMs { get; set; } = 2000;
     }
 
     public class GameSettings

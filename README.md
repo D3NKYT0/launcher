@@ -1,48 +1,80 @@
-# L2Updater
+# L2Updater - Launcher para Lineage 2
 
-Launcher e atualizador para servidor Lineage 2.
+Um launcher moderno e eficiente para servidores de Lineage 2, desenvolvido em C# com WPF.
 
-## O que é
+## 🚀 Scripts de Build
 
-Aplicação WPF que gerencia downloads, atualizações e execução do cliente Lineage 2.
+### `build.bat` - Build Completo
+Executa todo o processo de build e copia o executável para a raiz:
+1. Limpa builds anteriores
+2. Restaura dependências
+3. Compila o projeto
+4. Gera executável único
+5. **Copia o executável para a raiz do projeto**
 
-## Funcionalidades
+**Resultado:** `L2Updater.exe` na pasta raiz
 
-- ✅ Download automático de patches
-- ✅ Verificação de integridade de arquivos (CRC32)
-- ✅ Atualização automática do próprio launcher
-- ✅ Interface multilíngue (Russo/Inglês)
-- ✅ Links para redes sociais e recursos do servidor
-- ✅ Logs detalhados de operações
-- ✅ Validação de segurança de arquivos
+### `copy-to-root.bat` - Apenas Copiar
+Copia o executável da pasta publish para a raiz (requer build prévio):
+- Útil quando você já fez o build e só quer mover o arquivo
+- Verifica se o executável existe antes de copiar
 
-## Requisitos
+### `clean.bat` - Limpeza Completa
+Remove todos os arquivos de build e o executável da raiz:
+1. Remove executável da raiz
+2. Limpa o projeto
+3. Remove pastas bin e obj
 
-- Windows 10/11
-- .NET 9.0 Runtime
-- Conexão com internet
+## 📁 Estrutura de Arquivos
 
-## Instalação
-
-1. Baixe o executável
-2. Execute `L2Updater.exe`
-
-## Build
-
-```bash
-dotnet restore
-dotnet build
-dotnet run
+```
+launcher/
+├── L2Updater.exe          # Executável final (após build)
+├── build.bat              # Script de build completo
+├── copy-to-root.bat       # Script para copiar para raiz
+├── clean.bat              # Script de limpeza
+├── L2Updater.csproj       # Arquivo de projeto
+├── bin/                   # Pasta de build (removida pelo clean)
+│   └── Release/
+│       └── net9.0-windows/
+│           └── win-x64/
+│               └── publish/
+│                   └── L2Updater.exe  # Executável original
+└── src/                   # Código fonte
 ```
 
-## Tecnologias
+## 🔧 Como Usar
 
-- **.NET 9.0** - Framework
-- **WPF** - Interface gráfica
-- **MVVM** - Padrão de arquitetura
-- **Serilog** - Logging
-- **Microsoft.Extensions** - Injeção de dependência
+### Build Completo
+```bash
+build.bat
+```
 
-## Licença
+### Limpeza
+```bash
+clean.bat
+```
 
-Proprietário - Todos os direitos reservados.
+## ⚙️ Configurações
+
+O projeto está configurado para gerar um executável único (`PublishSingleFile=true`) que inclui todas as dependências necessárias.
+
+### Configurações do Projeto (.csproj)
+- **Target Framework:** .NET 9.0 Windows
+- **PublishSingleFile:** true
+- **SelfContained:** false
+- **RuntimeIdentifier:** win-x64
+
+## 🎯 Benefícios
+
+1. **Executável Único:** Tudo em um arquivo .exe
+2. **Fácil Distribuição:** Arquivo na raiz do projeto
+3. **Scripts Organizados:** Diferentes opções para diferentes necessidades
+4. **Limpeza Automática:** Remove arquivos desnecessários
+
+## 📝 Notas
+
+- O executável final fica na raiz do projeto como `L2Updater.exe`
+- A pasta `bin` contém apenas arquivos temporários de build
+- Use `clean.bat` para remover todos os arquivos de build
+- O executável é otimizado para Windows x64

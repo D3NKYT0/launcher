@@ -21,7 +21,10 @@ namespace Updater.Models
                     MaxRetryAttempts = 3,
                     RetryDelaySeconds = 5,
                     DownloadTimeoutSeconds = 300,
-                    MaxConcurrentDownloads = 3
+                    MaxConcurrentDownloads = 3,
+                    AutoCloseGameProcesses = true,
+                    ProcessCloseTimeoutMs = 5000,
+                    ProcessKillTimeoutMs = 2000
                 },
                 GameSettings = new GameSettings
                 {
@@ -70,7 +73,12 @@ namespace Updater.Models
                 {
                     ValidateCertificates = false,
                     RequireSignatureValidation = false,
-                    AllowedFileExtensions = new List<string> { ".exe", ".dll", ".bin", ".dat", ".ini", ".txt", ".xml", ".zip" },
+                    AllowedFileExtensions = new List<string> { 
+                        ".exe", ".dll", ".bin", ".dat", ".ini", ".txt", ".xml", ".zip", ".u", ".int", ".ttf",
+                        ".pak", ".l2", ".sys", ".cfg", ".log", ".bak", ".tmp", ".cache", ".idx", ".grp",
+                        ".pck", ".ukx", ".ifr", ".htm", ".unr", ".ogg", ".uax", ".usx", ".utx", ".bmp", ".ddf",
+                        ".des", ".sys", ".ffe", ".gly", ".vxd"
+                    },
                     BlockedFileExtensions = new List<string> { ".bat", ".cmd", ".ps1", ".vbs", ".js" }
                 }
             };
