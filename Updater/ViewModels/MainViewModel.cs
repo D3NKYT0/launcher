@@ -51,7 +51,7 @@ namespace Updater.ViewModels
         private bool _isBusy;
 
         [ObservableProperty]
-        private string _savePath = AppDomain.CurrentDomain.BaseDirectory;
+        private string _savePath = GetDefaultGamePath();
 
         [ObservableProperty]
         private bool _hasError;
@@ -113,8 +113,35 @@ namespace Updater.ViewModels
                 if (!File.Exists(executablePath))
                 {
                     _logger.LogError("Game executable not found: {ExecutablePath}", executablePath);
-                    Info = new LocString("Игра не найдена", "Game not found");
-                    return;
+                    
+                    // Try to find the game in other common locations
+                    var alternativePaths = new[]
+                    {
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "BUILDER", "LAUNCHER", "system"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "LAUNCHER", "system"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Lineage2", "system"),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "L2", "system"),
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "system")
+                    };
+
+                    foreach (var altPath in alternativePaths)
+                    {
+                        var altExecutablePath = Path.Combine(altPath, _settings.GameSettings.ExecutableName);
+                        if (File.Exists(altExecutablePath))
+                        {
+                            _logger.LogInformation("Found game executable at alternative location: {AltPath}", altExecutablePath);
+                            executablePath = altExecutablePath;
+                            gamePath = altPath;
+                            break;
+                        }
+                    }
+
+                    if (!File.Exists(executablePath))
+                    {
+                        Info = new LocString("Игра не найдена. Установите игру или выполните полное обновление.", 
+                                            "Game not found. Please install the game or perform a full update.");
+                        return;
+                    }
                 }
 
                 // Validate executable
@@ -320,6 +347,30 @@ namespace Updater.ViewModels
             ProgressFull = progress.ProgressPercentage;
             ProgressFile = progress.DownloadProgressPercentage;
             DownloadInfo = new LocString(progress.Status, progress.Status);
+        }
+
+        private static string GetDefaultGamePath()
+        {
+            // Try to find the game in common locations
+            var possiblePaths = new[]
+            {
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "BUILDER", "LAUNCHER"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "LAUNCHER"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Lineage2"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "L2"),
+                AppDomain.CurrentDomain.BaseDirectory
+            };
+
+            foreach (var path in possiblePaths)
+            {
+                if (Directory.Exists(path))
+                {
+                    return path;
+                }
+            }
+
+            // Default to launcher directory if no game directory found
+            return AppDomain.CurrentDomain.BaseDirectory;
         }
 
         private string GetGamePath()

@@ -11,14 +11,6 @@ namespace Updater
 {
 	public partial class NotificationWindow : Window, IComponentConnector
 	{
-
-		//internal Button CancelQuest;
-
-		//internal Button OkQuest;
-
-		//internal Button OKInfo;
-
-		//private bool _contentLoaded;
 		
 		public string Header
 		{
@@ -65,45 +57,5 @@ namespace Updater
 			base.DialogResult = false;
 		}
 
-		/*
-		[DebuggerNonUserCode]
-		[GeneratedCode("PresentationBuildTasks", "4.0.0.0")]
-		public void InitializeComponent()
-		{
-			if (!_contentLoaded)
-			{
-				_contentLoaded = true;
-				Uri resourceLocator = new Uri("/VLGame;component/notificationwindow.xaml", UriKind.Relative);
-				Application.LoadComponent(this, resourceLocator);
-			}
-		}
-
-		[DebuggerNonUserCode]
-		[GeneratedCode("PresentationBuildTasks", "4.0.0.0")]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		void IComponentConnector.Connect(int connectionId, object target)
-		{
-			switch (connectionId)
-			{
-			case 1:
-				((NotificationWindow)target).MouseDown += Window_MouseDown;
-				break;
-			case 2:
-				CancelQuest = (Button)target;
-				CancelQuest.Click += Button_Click_1;
-				break;
-			case 3:
-				OkQuest = (Button)target;
-				OkQuest.Click += Button_Click;
-				break;
-			case 4:
-				OKInfo = (Button)target;
-				OKInfo.Click += Button_Click_1;
-				break;
-			default:
-				_contentLoaded = true;
-				break;
-			}
-		}*/
 	}
 }

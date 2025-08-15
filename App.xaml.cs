@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -69,11 +70,7 @@ namespace L2Updater
             });
 
             // HTTP Client
-            services.AddHttpClient("UpdateClient", client =>
-            {
-                client.Timeout = TimeSpan.FromSeconds(appSettings.UpdateSettings.DownloadTimeoutSeconds);
-                client.DefaultRequestHeaders.Add("User-Agent", "L2Updater/1.0");
-            });
+            services.AddHttpClient();
 
             // Services
             services.AddSingleton<ISecurityService, SecurityService>();

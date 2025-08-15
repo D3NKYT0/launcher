@@ -32,26 +32,71 @@ namespace Updater.Services
             _settings = settings;
         }
 
+        private string CombineUrl(string baseUrl, string path)
+        {
+            try
+            {
+                // Remove trailing slash from base URL and leading slash from path
+                baseUrl = baseUrl.TrimEnd('/');
+                path = path.TrimStart('/');
+                var combinedUrl = $"{baseUrl}/{path}";
+                
+                _logger.LogDebug("Combined URL: {BaseUrl} + {Path} = {CombinedUrl}", baseUrl, path, combinedUrl);
+                
+                // Validate the combined URL
+                if (!Uri.TryCreate(combinedUrl, UriKind.Absolute, out var uri))
+                {
+                    throw new InvalidOperationException($"Invalid URL created: {combinedUrl}");
+                }
+                
+                return combinedUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error combining URL: {BaseUrl} + {Path}", baseUrl, path);
+                throw;
+            }
+        }
+
+
+
+
+
         public async Task<UpdateInfoModel> GetUpdateInfoAsync(string updateUrl, CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Fetching update info from {UpdateUrl}", updateUrl);
                 
+                // Log the HttpClient configuration
+                _logger.LogDebug("HttpClient timeout: {Timeout}", _httpClient.Timeout);
+                _logger.LogDebug("HttpClient base address: {BaseAddress}", _httpClient.BaseAddress);
+                
                 if (!_securityService.ValidateCertificate(updateUrl))
                 {
                     throw new InvalidOperationException($"Invalid certificate for URL: {updateUrl}");
                 }
 
-                var url = Path.Combine(updateUrl, "UpdateInfo.xml");
+                var url = CombineUrl(updateUrl, "UpdateInfo.xml");
                 _logger.LogInformation("Requesting URL: {Url}", url);
+                
+                _logger.LogDebug("Certificate validation disabled for {Url}", url);
+                
+                // Test URL parsing
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var testUri))
+                {
+                    throw new InvalidOperationException($"Failed to parse URL: {url}");
+                }
+                
+                _logger.LogDebug("URL parsed successfully: {Scheme}://{Host}:{Port}{PathAndQuery}", 
+                    testUri.Scheme, testUri.Host, testUri.Port, testUri.PathAndQuery);
                 
                 var response = await _httpClient.GetStringAsync(url, cancellationToken);
                 
-                var updateInfo = JsonSerializer.Deserialize<UpdateInfoModel>(response, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                // Use XmlSerializer for XML parsing
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UpdateInfoModel));
+                using var reader = new StringReader(response);
+                var updateInfo = (UpdateInfoModel?)serializer.Deserialize(reader);
 
                 if (updateInfo == null)
                 {
@@ -91,13 +136,13 @@ namespace Updater.Services
                     throw new InvalidOperationException($"Invalid certificate for URL: {updateUrl}");
                 }
 
-                var url = Path.Combine(updateUrl, "UpdateConfig.xml");
+                var url = CombineUrl(updateUrl, "UpdateConfig.xml");
                 var response = await _httpClient.GetStringAsync(url, cancellationToken);
                 
-                var updateConfig = JsonSerializer.Deserialize<UpdateConfig>(response, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                // Use XmlSerializer for XML parsing
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(UpdateConfig));
+                using var reader = new StringReader(response);
+                var updateConfig = (UpdateConfig?)serializer.Deserialize(reader);
 
                 if (updateConfig == null)
                 {
@@ -118,7 +163,7 @@ namespace Updater.Services
         {
             try
             {
-                var url = Path.Combine(updateUrl, "updaterver.txt");
+                var url = CombineUrl(updateUrl, "updaterver.txt");
                 var response = await _httpClient.GetStringAsync(url, cancellationToken);
                 
                 if (int.TryParse(response.Trim(), out var remoteVersion))
@@ -129,6 +174,11 @@ namespace Updater.Services
                     return hasUpdate;
                 }
 
+                return false;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogInformation("Self-update file not found at {UpdateUrl}/updaterver.txt - skipping self-update check", updateUrl);
                 return false;
             }
             catch (Exception ex)
@@ -148,7 +198,7 @@ namespace Updater.Services
                 var tempPath = Path.Combine(Path.GetTempPath(), updaterFileName);
                 
                 // Download new updater
-                var downloadUrl = Path.Combine(updateUrl, updaterFileName);
+                var downloadUrl = CombineUrl(updateUrl, updaterFileName);
                 using var response = await _httpClient.GetAsync(downloadUrl, cancellationToken);
                 response.EnsureSuccessStatusCode();
                 
@@ -346,7 +396,7 @@ namespace Updater.Services
 
         private async Task DownloadSingleFileAsync(FileModel file, string updateUrl, string savePath, CancellationToken cancellationToken)
         {
-            var downloadUrl = Path.Combine(updateUrl, file.Path);
+            var downloadUrl = CombineUrl(updateUrl, file.Path);
             var localPath = Path.Combine(savePath, file.SavePath, file.Name);
             
             // Ensure directory exists
