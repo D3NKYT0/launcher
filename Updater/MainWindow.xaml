@@ -53,7 +53,6 @@
                 </av:LinearGradientBrush>
             </av:Button.Background>
         </Button>
-        <Button Name="QuickCheck" Content="Быстрая проверка" HorizontalAlignment="Left" Margin="650,346,0,0" VerticalAlignment="Top" Width="179" Cursor="Hand" Height="42" Template="{DynamicResource ButtonTemplate}" FontSize="18.667" Command="{Binding StartQuickUpdateCommand}" />
         <Button Name="FullCheck" Content="ОБНОВИТЬ" Margin="659,438,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource FullCheckButtonPictureTemplate}" Height="42" FontSize="18.667" Width="140" HorizontalAlignment="Left" Command="{Binding StartFullUpdateCommand}" >
             <av:Button.Background>
                 <av:LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
