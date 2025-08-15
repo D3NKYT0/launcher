@@ -44,6 +44,8 @@ namespace Updater.Services
                 }
 
                 var url = Path.Combine(updateUrl, "UpdateInfo.xml");
+                _logger.LogInformation("Requesting URL: {Url}", url);
+                
                 var response = await _httpClient.GetStringAsync(url, cancellationToken);
                 
                 var updateInfo = JsonSerializer.Deserialize<UpdateInfoModel>(response, new JsonSerializerOptions
@@ -60,6 +62,16 @@ namespace Updater.Services
                     GetTotalFileCount(updateInfo.Folder));
 
                 return updateInfo;
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Network error fetching update info from {UpdateUrl}. Please check your internet connection and server availability.", updateUrl);
+                throw new InvalidOperationException($"Network error: {ex.Message}. Please check your internet connection and server availability.", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Request timeout fetching update info from {UpdateUrl}", updateUrl);
+                throw new InvalidOperationException($"Request timeout. Please check your internet connection and try again.", ex);
             }
             catch (Exception ex)
             {

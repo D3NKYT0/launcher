@@ -14,6 +14,7 @@ using Updater.DataContractModels;
 using Updater.Localization;
 using Updater.Models;
 using Updater.Services;
+using System.Windows;
 
 namespace Updater.ViewModels
 {
@@ -70,6 +71,9 @@ namespace Updater.ViewModels
         [ObservableProperty]
         private int _totalFiles;
 
+        [ObservableProperty]
+        private bool _isSearching;
+
         public MainViewModel(
             ILogger<MainViewModel> logger,
             IUpdateService updateService,
@@ -85,18 +89,24 @@ namespace Updater.ViewModels
         [RelayCommand]
         private async Task StartQuickUpdateAsync()
         {
+            WriteLocalLog("StartQuickUpdateAsync command executed");
+            _logger.LogInformation("StartQuickUpdateAsync command executed");
             await StartUpdateAsync(UpdateTypes.Quick);
         }
 
         [RelayCommand]
         private async Task StartFullUpdateAsync()
         {
+            WriteLocalLog("StartFullUpdateAsync command executed");
+            _logger.LogInformation("StartFullUpdateAsync command executed");
             await StartUpdateAsync(UpdateTypes.Full);
         }
 
         [RelayCommand]
         private async Task StartGameAsync()
         {
+            WriteLocalLog("StartGameAsync command executed");
+            _logger.LogInformation("StartGameAsync command executed");
             try
             {
                 _logger.LogInformation("Starting game");
@@ -149,15 +159,44 @@ namespace Updater.ViewModels
         [RelayCommand]
         private void CancelUpdate()
         {
-            _logger.LogInformation("Cancelling update");
+            WriteLocalLog("CancelUpdate command executed");
+            _logger.LogInformation("CancelUpdate command executed");
             _cancellationTokenSource?.Cancel();
         }
 
         [RelayCommand]
         private void Exit()
         {
-            _logger.LogInformation("Exiting application");
-            Environment.Exit(0);
+            WriteLocalLog("Exit command executed");
+            _logger.LogInformation("Exit command executed");
+            Application.Current.Shutdown();
+        }
+
+        [RelayCommand]
+        private void Tray()
+        {
+            WriteLocalLog("Tray command executed");
+            _logger.LogInformation("Tray command executed");
+            // Implement tray functionality here
+            // For now, just minimize the window
+            if (Application.Current.MainWindow != null)
+            {
+                Application.Current.MainWindow.WindowState = WindowState.Minimized;
+            }
+        }
+
+        private void WriteLocalLog(string message)
+        {
+            try
+            {
+                var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug.log");
+                var logMessage = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} - {message}{Environment.NewLine}";
+                File.AppendAllText(logPath, logMessage);
+            }
+            catch
+            {
+                // Ignore log writing errors
+            }
         }
 
         [RelayCommand]
@@ -186,6 +225,8 @@ namespace Updater.ViewModels
 
         private async Task StartUpdateAsync(UpdateTypes updateType)
         {
+            _logger.LogInformation("StartUpdateAsync called with type: {UpdateType}", updateType);
+            
             if (IsBusy)
             {
                 _logger.LogWarning("Update already in progress");
@@ -202,6 +243,7 @@ namespace Updater.ViewModels
                 _logger.LogInformation("Starting {UpdateType} update", updateType);
 
                 // Check for self-update first
+                _logger.LogInformation("Checking for self-update...");
                 if (await _updateService.CheckForSelfUpdateAsync(_settings.UpdateSettings.UpdateUrl, cancellationToken))
                 {
                     Info = new LocString("Доступна новая версия апдейтера", "New version of updater is available");
@@ -212,18 +254,23 @@ namespace Updater.ViewModels
                 }
 
                 // Get update info
+                _logger.LogInformation("Getting update info...");
                 Info = new LocString("Получение информации о обновлении", "Getting update information");
                 var updateInfo = await _updateService.GetUpdateInfoAsync(_settings.UpdateSettings.UpdateUrl, cancellationToken);
 
                 // Validate update
+                _logger.LogInformation("Validating update...");
                 if (!await _updateService.ValidateUpdateAsync(updateInfo, cancellationToken))
                 {
                     throw new InvalidOperationException("Update validation failed");
                 }
 
                 // Get files to update
+                _logger.LogInformation("Getting files to update...");
                 Info = new LocString("Проверка файлов для обновления", "Checking files for update");
                 var filesToUpdate = await _updateService.GetFilesToUpdateAsync(updateInfo, updateType, SavePath, cancellationToken);
+
+                _logger.LogInformation("Found {FileCount} files to update", filesToUpdate.Count());
 
                 if (!filesToUpdate.Any())
                 {
@@ -235,6 +282,7 @@ namespace Updater.ViewModels
                 var progress = new Progress<UpdateProgress>(OnUpdateProgress);
 
                 // Download and update files
+                _logger.LogInformation("Starting download and update...");
                 Info = new LocString("Загрузка файлов", "Downloading files");
                 var success = await _updateService.DownloadAndUpdateFilesAsync(
                     filesToUpdate, 
@@ -259,6 +307,12 @@ namespace Updater.ViewModels
             {
                 Info = new LocString("Обновление отменено пользователем", "Update cancelled by user");
                 _logger.LogInformation("Update cancelled by user");
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("Network error") || ex.Message.Contains("Request timeout"))
+            {
+                HasError = true;
+                Info = new LocString("Ошибка сети. Проверьте подключение к интернету.", "Network error. Please check your internet connection.");
+                _logger.LogError(ex, "Network error during update");
             }
             catch (Exception ex)
             {

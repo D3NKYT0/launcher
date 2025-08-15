@@ -32,7 +32,8 @@ namespace L2Updater
                 _serviceProvider = services.BuildServiceProvider();
 
                 // Create and show main window
-                var mainWindow = _serviceProvider.GetRequiredService<Updater.MainWindow>();
+                var viewModel = _serviceProvider.GetRequiredService<MainViewModel>();
+                var mainWindow = new Updater.MainWindow(viewModel);
                 mainWindow.Show();
             }
             catch (Exception ex)
@@ -59,10 +60,16 @@ namespace L2Updater
 
         private IConfiguration GetConfiguration()
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+            
+            #if DEBUG
+            environment = "Development";
+            #endif
+            
             return new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
                 .Build();
         }
 
@@ -97,8 +104,7 @@ namespace L2Updater
             // ViewModels
             services.AddTransient<MainViewModel>();
 
-            // Views
-            services.AddTransient<Updater.MainWindow>();
+            // Views - Removed since we create MainWindow manually
         }
     }
 }

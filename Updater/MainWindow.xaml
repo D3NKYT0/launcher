@@ -43,7 +43,7 @@
                 <ImageBrush ImageSource="pictures/background.png" />
             </Shape.Fill>
         </Rectangle>
-        <Button Name="Cancel" Content="ОТМЕНА" Margin="312,436,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource CancelButtonPictureTemplate}" Height="42" FontSize="18" Width="140" HorizontalAlignment="Left" Command="{Binding CancelCommand}" >
+        <Button Name="Cancel" Content="ОТМЕНА" Margin="312,436,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource CancelButtonPictureTemplate}" Height="42" FontSize="18" Width="140" HorizontalAlignment="Left" Command="{Binding CancelUpdateCommand}" >
             <av:Button.Background>
                 <av:LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                     <av:GradientStop Color="#FFF3F3F3" Offset="0"/>
@@ -53,8 +53,8 @@
                 </av:LinearGradientBrush>
             </av:Button.Background>
         </Button>
-        <Button Name="QuickCheck" Content="Быстрая проверка" HorizontalAlignment="Left" Margin="650,346,0,0" VerticalAlignment="Top" Width="179" Cursor="Hand" Height="42" Template="{DynamicResource ButtonTemplate}" FontSize="18.667" Visibility="Hidden" Command="{Binding QuickCommand}" />
-        <Button Name="FullCheck" Content="ОБНОВИТЬ" Margin="659,438,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource FullCheckButtonPictureTemplate}" Height="42" FontSize="18.667" Width="140" HorizontalAlignment="Left" Command="{Binding FullCommand}" >
+        <Button Name="QuickCheck" Content="Быстрая проверка" HorizontalAlignment="Left" Margin="650,346,0,0" VerticalAlignment="Top" Width="179" Cursor="Hand" Height="42" Template="{DynamicResource ButtonTemplate}" FontSize="18.667" Command="{Binding StartQuickUpdateCommand}" />
+        <Button Name="FullCheck" Content="ОБНОВИТЬ" Margin="659,438,0,0" VerticalAlignment="Top" Cursor="Hand" Template="{DynamicResource FullCheckButtonPictureTemplate}" Height="42" FontSize="18.667" Width="140" HorizontalAlignment="Left" Command="{Binding StartFullUpdateCommand}" >
             <av:Button.Background>
                 <av:LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
                     <av:GradientStop Color="#FFF3F3F3" Offset="0"/>
@@ -64,7 +64,7 @@
                 </av:LinearGradientBrush>
             </av:Button.Background>
         </Button>
-        <Button Name="StartButton" Content="" HorizontalAlignment="Left" Margin="450,424,0,0" VerticalAlignment="Top" Template="{DynamicResource StartButtonPictureTemplate}" FontSize="24" Cursor="Hand" Command="{Binding StartCommand}" Foreground="{x:Null}" BorderBrush="{x:Null}" Width="215" Height="70" Background="{x:Null}" RenderTransformOrigin="0.504,0.508" />
+        <Button Name="StartButton" Content="" HorizontalAlignment="Left" Margin="450,424,0,0" VerticalAlignment="Top" Template="{DynamicResource StartButtonPictureTemplate}" FontSize="24" Cursor="Hand" Command="{Binding StartGameCommand}" Foreground="{x:Null}" BorderBrush="{x:Null}" Width="215" Height="70" Background="{x:Null}" RenderTransformOrigin="0.504,0.508" />
         <ProgressBar Name="FileProgress" HorizontalAlignment="Left" Height="6" Margin="807,455,0,0" VerticalAlignment="Top" Width="181" Value="{Binding ProgressFile}" Maximum="{Binding MaxProgressFile}" Background="{x:Null}" BorderBrush="{x:Null}">
             <Control.Foreground>
                 <ImageBrush ImageSource="pictures/progress.png" />

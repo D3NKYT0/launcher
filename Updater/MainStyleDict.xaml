@@ -416,4 +416,30 @@
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
+    <ControlTemplate x:Key="FileButton" TargetType="{x:Type Button}">
+        <Grid x:Name="grid">
+            <Grid.Background>
+                <ImageBrush ImageSource="pictures/button.png" />
+            </Grid.Background>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="grid" Property="Background">
+                    <Setter.Value>
+                        <ImageBrush ImageSource="pictures/button_hover.png" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="grid" Property="Background">
+                    <Setter.Value>
+                        <ImageBrush ImageSource="pictures/button_press.png" />
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="grid" Property="Opacity" Value="0.5" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 </ResourceDictionary>
