@@ -18,13 +18,13 @@ namespace Updater.Models
                     UpdaterVersion = 1,
                     GameStartPath = "system",
                     PatchPath = "https://updater.denky.dev.br",
-                    MaxRetryAttempts = 3,
-                    RetryDelaySeconds = 5,
+                    MaxRetryAttempts = 5, // Aumentado para 5 tentativas
+                    RetryDelaySeconds = 3, // Reduzido para 3 segundos
                     DownloadTimeoutSeconds = 300,
-                    MaxConcurrentDownloads = 1, // Reduzido para 1 para evitar problemas de concorrência
+                    MaxConcurrentDownloads = 1, // Mantido em 1 para evitar problemas de concorrência
                     AutoCloseGameProcesses = true,
-                    ProcessCloseTimeoutMs = 5000,
-                    ProcessKillTimeoutMs = 2000
+                    ProcessCloseTimeoutMs = 3000, // Reduzido para 3 segundos
+                    ProcessKillTimeoutMs = 1000  // Reduzido para 1 segundo
                 },
                 GameSettings = new GameSettings
                 {
