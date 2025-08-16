@@ -335,47 +335,70 @@ namespace Updater.Services
 
                 _logger.LogInformation("Starting download of {FileCount} files ({TotalBytes} bytes)", totalFiles, totalBytes);
 
-                // Create semaphore for concurrent downloads
-                using var semaphore = new SemaphoreSlim(_settings.UpdateSettings.MaxConcurrentDownloads);
-                var tasks = new List<Task>();
+                // Report initial progress
+                progress?.Report(new UpdateProgress
+                {
+                    CurrentFile = 0,
+                    TotalFiles = totalFiles,
+                    BytesDownloaded = 0,
+                    TotalBytes = totalBytes,
+                    CurrentFileName = "Starting download...",
+                    Status = "Initializing download..."
+                });
 
+                // Process files sequentially for better progress reporting
                 foreach (var file in fileList)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var task = Task.Run(async () =>
+                    try
                     {
-                        await semaphore.WaitAsync(cancellationToken);
-                        try
+                        // Report current file being processed
+                        progress?.Report(new UpdateProgress
                         {
-                            await DownloadFileWithRetryAsync(file, updateUrl, savePath, cancellationToken);
-                            
-                            Interlocked.Increment(ref currentFile);
-                            Interlocked.Add(ref downloadedBytes, file.Size);
-                            
-                            progress?.Report(new UpdateProgress
-                            {
-                                CurrentFile = currentFile,
-                                TotalFiles = totalFiles,
-                                BytesDownloaded = downloadedBytes,
-                                TotalBytes = totalBytes,
-                                CurrentFileName = file.Name,
-                                Status = $"Downloaded {file.Name}"
-                            });
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    }, cancellationToken);
+                            CurrentFile = currentFile,
+                            TotalFiles = totalFiles,
+                            BytesDownloaded = downloadedBytes,
+                            TotalBytes = totalBytes,
+                            CurrentFileName = file.Name,
+                            Status = $"Downloading {file.Name}..."
+                        });
 
-                    tasks.Add(task);
+                        await DownloadFileWithRetryAsync(file, updateUrl, savePath, cancellationToken, progress, currentFile, totalFiles, downloadedBytes, totalBytes);
+                        
+                        currentFile++;
+                        downloadedBytes += file.Size;
+                        
+                        // Report completion of current file
+                        progress?.Report(new UpdateProgress
+                        {
+                            CurrentFile = currentFile,
+                            TotalFiles = totalFiles,
+                            BytesDownloaded = downloadedBytes,
+                            TotalBytes = totalBytes,
+                            CurrentFileName = file.Name,
+                            Status = $"Downloaded {file.Name}"
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to download file {FileName}", file.Name);
+                        
+                        // Report error but continue with next file
+                        progress?.Report(new UpdateProgress
+                        {
+                            CurrentFile = currentFile,
+                            TotalFiles = totalFiles,
+                            BytesDownloaded = downloadedBytes,
+                            TotalBytes = totalBytes,
+                            CurrentFileName = file.Name,
+                            Status = $"Error downloading {file.Name}: {ex.Message}"
+                        });
+                    }
                 }
-
-                await Task.WhenAll(tasks);
                 
-                _logger.LogInformation("Successfully downloaded all {FileCount} files", totalFiles);
-                return true;
+                _logger.LogInformation("Successfully downloaded {CurrentFile} of {TotalFiles} files", currentFile, totalFiles);
+                return currentFile == totalFiles;
             }
             catch (Exception ex)
             {
@@ -417,7 +440,7 @@ namespace Updater.Services
             }
         }
 
-        private async Task DownloadFileWithRetryAsync(FileModel file, string updateUrl, string savePath, CancellationToken cancellationToken)
+        private async Task DownloadFileWithRetryAsync(FileModel file, string updateUrl, string savePath, CancellationToken cancellationToken, IProgress<UpdateProgress>? progress = null, int currentFile = 0, int totalFiles = 0, long downloadedBytes = 0, long totalBytes = 0)
         {
             var maxRetries = _settings.UpdateSettings.MaxRetryAttempts;
             var retryDelay = TimeSpan.FromSeconds(_settings.UpdateSettings.RetryDelaySeconds);
@@ -426,7 +449,7 @@ namespace Updater.Services
             {
                 try
                 {
-                    await DownloadSingleFileAsync(file, updateUrl, savePath, cancellationToken);
+                    await DownloadSingleFileAsync(file, updateUrl, savePath, cancellationToken, progress, currentFile, totalFiles, downloadedBytes, totalBytes);
                     return;
                 }
                 catch (IOException ex) when (attempt < maxRetries && ex.Message.Contains("being used by another process"))
@@ -457,7 +480,7 @@ namespace Updater.Services
             }
         }
 
-        private async Task DownloadSingleFileAsync(FileModel file, string updateUrl, string savePath, CancellationToken cancellationToken)
+        private async Task DownloadSingleFileAsync(FileModel file, string updateUrl, string savePath, CancellationToken cancellationToken, IProgress<UpdateProgress>? progress = null, int currentFile = 0, int totalFiles = 0, long downloadedBytes = 0, long totalBytes = 0)
         {
             // Construir a URL correta para o arquivo ZIP
             // O builder cria arquivos ZIP individuais: PATCH/system/arquivo.zip
@@ -501,22 +524,61 @@ namespace Updater.Services
             // Use a unique temporary file name to avoid conflicts
             var tempZipPath = Path.Combine(Path.GetTempPath(), $"l2updater_{Guid.NewGuid()}_{file.Name}.zip");
             
-            try
-            {
-                using var response = await httpClient.GetAsync(downloadUrl, cancellationToken);
-                response.EnsureSuccessStatusCode();
+                         try
+             {
+                 using var response = await httpClient.GetAsync(downloadUrl, cancellationToken);
+                 response.EnsureSuccessStatusCode();
 
-                // Download to temporary location with proper file sharing
-                using var fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await response.Content.CopyToAsync(fileStream, cancellationToken);
-                
-                // Ensure the file is fully written before proceeding
-                fileStream.Flush();
-                
-                // Extract the ZIP file
-                _logger.LogDebug("Extracting ZIP file: {ZipPath} to {ExtractPath}", tempZipPath, localPath);
-                await ExtractZipFileAsync(tempZipPath, localPath, cancellationToken);
-            }
+                 // Download to temporary location with proper file sharing
+                 using (var fileStream = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                 {
+                     var contentLength = response.Content.Headers.ContentLength ?? 0;
+                     var buffer = new byte[8192];
+                     var totalRead = 0L;
+                     
+                     using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+                     
+                     while (true)
+                     {
+                         var bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                         if (bytesRead == 0) break;
+                         
+                         await fileStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+                         totalRead += bytesRead;
+                         
+                         // Report progress during download
+                         if (progress != null && contentLength > 0)
+                         {
+                             var fileProgress = (double)totalRead / contentLength * 100;
+                             var overallProgress = (double)(downloadedBytes + totalRead) / totalBytes * 100;
+                             
+                             progress.Report(new UpdateProgress
+                             {
+                                 CurrentFile = currentFile,
+                                 TotalFiles = totalFiles,
+                                 BytesDownloaded = downloadedBytes + totalRead,
+                                 TotalBytes = totalBytes,
+                                 CurrentFileName = file.Name,
+                                 Status = $"Downloading {file.Name}... ({fileProgress:F1}%)"
+                             });
+                         }
+                     }
+                     
+                     // Ensure the file is fully written before proceeding
+                     fileStream.Flush();
+                 }
+                 
+                 // Force garbage collection to ensure file handles are released
+                 GC.Collect();
+                 GC.WaitForPendingFinalizers();
+                 
+                 // Small delay to ensure file handles are released
+                 await Task.Delay(100);
+                 
+                 // Extract the ZIP file
+                 _logger.LogDebug("Extracting ZIP file: {ZipPath} to {ExtractPath}", tempZipPath, localPath);
+                 await ExtractZipFileAsync(tempZipPath, localPath, cancellationToken);
+             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "HTTP error downloading {FileName} from {Url}", file.Name, downloadUrl);
@@ -615,33 +677,35 @@ namespace Updater.Services
                     throw new IOException($"ZIP file is locked by another process after waiting: {zipPath}");
                 }
 
-                // Use a more robust approach to extract the ZIP file
-                using var fileStream = new FileStream(zipPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using var archive = new System.IO.Compression.ZipArchive(fileStream, System.IO.Compression.ZipArchiveMode.Read);
-                
-                var entry = archive.Entries.FirstOrDefault();
-                
-                if (entry == null)
-                {
-                    throw new InvalidOperationException($"No entries found in ZIP file: {zipPath}");
-                }
+                                 // Use a more robust approach to extract the ZIP file
+                 using (var fileStream = new FileStream(zipPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                 {
+                     using var archive = new System.IO.Compression.ZipArchive(fileStream, System.IO.Compression.ZipArchiveMode.Read);
+                     
+                     var entry = archive.Entries.FirstOrDefault();
+                     
+                     if (entry == null)
+                     {
+                         throw new InvalidOperationException($"No entries found in ZIP file: {zipPath}");
+                     }
 
-                // Check if target file is locked before extraction
-                if (File.Exists(extractPath))
-                {
-                    if (!await WaitForFileAccessAsync(extractPath))
-                    {
-                        throw new IOException($"Target file is locked by another process after waiting: {extractPath}");
-                    }
-                }
+                     // Check if target file is locked before extraction
+                     if (File.Exists(extractPath))
+                     {
+                         if (!await WaitForFileAccessAsync(extractPath))
+                         {
+                             throw new IOException($"Target file is locked by another process after waiting: {extractPath}");
+                         }
+                     }
 
-                // Extract the first (and only) entry to the target path
-                using var entryStream = entry.Open();
-                using var targetStream = new FileStream(extractPath, FileMode.Create, FileAccess.Write, FileShare.None);
-                await entryStream.CopyToAsync(targetStream, cancellationToken);
+                     // Extract the first (and only) entry to the target path
+                     using var entryStream = entry.Open();
+                     using var targetStream = new FileStream(extractPath, FileMode.Create, FileAccess.Write, FileShare.None);
+                     await entryStream.CopyToAsync(targetStream, cancellationToken);
+                 }
                 
-                _logger.LogDebug("Successfully extracted {EntryName} from {ZipPath} to {ExtractPath}", 
-                    entry.Name, zipPath, extractPath);
+                                 _logger.LogDebug("Successfully extracted file from {ZipPath} to {ExtractPath}", 
+                     zipPath, extractPath);
             }
             catch (Exception ex)
             {
@@ -721,73 +785,7 @@ namespace Updater.Services
             }
         }
 
-        private async Task TryCloseProcessesUsingFileAsync(string filePath)
-        {
-            try
-            {
-                // This is a simplified approach - in a real implementation, you might use
-                // Windows API calls to find processes using specific files
-                // For now, we'll just try to close common processes that might be using game files
-                
-                var fileName = Path.GetFileName(filePath);
-                var fileExtension = Path.GetExtension(filePath).ToLowerInvariant();
-                
-                // List of processes that commonly use game files
-                var suspiciousProcesses = new[]
-                {
-                    "L2", "Lineage2", "l2", "lineage2",
-                    "L2Updater", "l2updater", "L2Updater.exe", "l2updater.exe",
-                    "explorer", "Explorer", // Sometimes explorer.exe locks files
-                    "svchost", "Svchost"   // System processes
-                };
-                
-                foreach (var processName in suspiciousProcesses)
-                {
-                    try
-                    {
-                        var processes = System.Diagnostics.Process.GetProcessesByName(processName);
-                        foreach (var process in processes)
-                        {
-                            try
-                            {
-                                if (!process.HasExited)
-                                {
-                                    _logger.LogDebug("Attempting to close process {ProcessName} (PID: {ProcessId}) that might be using {FileName}", 
-                                        process.ProcessName, process.Id, fileName);
-                                    
-                                    process.CloseMainWindow();
-                                    
-                                    if (!process.WaitForExit(1000)) // Short timeout
-                                    {
-                                        process.Kill();
-                                        process.WaitForExit(500);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogDebug(ex, "Error closing process {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
-                            }
-                            finally
-                            {
-                                process.Dispose();
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogDebug(ex, "Error getting processes with name: {ProcessName}", processName);
-                    }
-                }
-                
-                // Give some time for processes to close
-                await Task.Delay(500);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error attempting to close processes using file: {FilePath}", filePath);
-            }
-        }
+        // Método removido por segurança - não fechamos processos automaticamente
 
         private async Task TryCloseFileProcessesAsync(string filePath)
         {
@@ -801,77 +799,14 @@ namespace Updater.Services
                 }
 
                 var fileName = Path.GetFileName(filePath);
+                _logger.LogInformation("Auto-close is disabled for safety. Please close game manually if needed.");
                 
-                // List of common game processes that might be using the files
-                var gameProcessNames = new[] { "L2.exe", "l2.exe", "Lineage2.exe", "lineage2.exe" };
-                
-                // Always try to close game processes, not just for specific files
-                _logger.LogInformation("Attempting to close game processes before updating {FileName}", fileName);
-                
-                // Also check for any processes that might be using the specific file
-                await TryCloseProcessesUsingFileAsync(filePath);
-                
-                var processes = System.Diagnostics.Process.GetProcessesByName("L2")
-                    .Concat(System.Diagnostics.Process.GetProcessesByName("Lineage2"))
-                    .Concat(System.Diagnostics.Process.GetProcessesByName("l2"))
-                    .Concat(System.Diagnostics.Process.GetProcessesByName("L2Updater"))
-                    .Concat(System.Diagnostics.Process.GetProcessesByName("l2updater"))
-                    .Distinct();
-
-                var closedProcesses = new List<string>();
-
-                foreach (var process in processes)
-                {
-                    try
-                    {
-                        if (!process.HasExited)
-                        {
-                            _logger.LogInformation("Closing process {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
-                            
-                            // Try graceful shutdown first
-                            process.CloseMainWindow();
-                            
-                            // Wait for process to close gracefully using configured timeout
-                            var closeTimeout = _settings.UpdateSettings.ProcessCloseTimeoutMs;
-                            if (!process.WaitForExit(closeTimeout))
-                            {
-                                _logger.LogWarning("Process {ProcessName} (PID: {ProcessId}) did not close gracefully, forcing termination", process.ProcessName, process.Id);
-                                process.Kill();
-                                
-                                // Wait for process to be killed using configured timeout
-                                var killTimeout = _settings.UpdateSettings.ProcessKillTimeoutMs;
-                                process.WaitForExit(killTimeout);
-                            }
-                            
-                            closedProcesses.Add($"{process.ProcessName} (PID: {process.Id})");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Error closing process {ProcessName} (PID: {ProcessId})", process.ProcessName, process.Id);
-                    }
-                    finally
-                    {
-                        process.Dispose();
-                    }
-                }
-                
-                if (closedProcesses.Count > 0)
-                {
-                    _logger.LogInformation("Closed {Count} processes: {Processes}", closedProcesses.Count, string.Join(", ", closedProcesses));
-                }
-                
-                // Give more time for processes to fully close and file handles to be released
-                await Task.Delay(2000);
-                
-                // Force garbage collection to help release file handles
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
+                // Por segurança, não fechamos nenhum processo automaticamente
+                // O usuário deve fechar o jogo manualmente se necessário
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error attempting to close file processes for {FilePath}", filePath);
+                _logger.LogWarning(ex, "Error in TryCloseFileProcessesAsync for {FilePath}", filePath);
             }
         }
 
